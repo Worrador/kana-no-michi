@@ -980,3 +980,55 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   letter-spacing: .06em;
   color: var(--sumi-soft);
 }
+
+/* ---------- 心得 the rule box ---------- */
+.rule {
+  margin: 0 0 1.4rem;
+  padding: 1.1rem 1.2rem 1rem;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule-soft);
+  border-left: 3px solid var(--ai);
+  text-align: left;
+}
+.rule h3 { margin: 0 0 .7rem; font-size: .95rem; }
+.rule h3 .jp { font-family: var(--font-jp); letter-spacing: .18em; }
+.rule h3 .en { color: var(--sumi-faint); font-size: .76rem; letter-spacing: .14em; text-transform: uppercase; }
+.rule ul { margin: 0 0 .8rem; padding-left: 1.1rem; }
+.rule li { margin-bottom: .45rem; font-size: .88rem; line-height: 1.8; color: var(--sumi-soft); }
+.rule li b { color: var(--sumi); font-weight: 500; }
+.rule p { margin: 0; font-size: .84rem; line-height: 1.8; color: var(--sumi-faint); }
+.rule i { font-style: italic; color: var(--ai); }
+
+/* ---------- the compound on a teaching card ---------- */
+.example {
+  margin: 1.1rem auto 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule-soft);
+}
+.example__label {
+  display: block;
+  font-size: .68rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--sumi-faint);
+}
+.example__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: .7rem;
+  margin-top: .4rem;
+}
+.example__row b { font-family: var(--font-jp); font-size: 1.9rem; font-weight: 500; letter-spacing: .06em; }
+.example__row i { font-style: italic; font-size: 1.05rem; color: var(--ai); letter-spacing: .08em; }
+.example__en { display: block; margin-top: .3rem; font-size: .85rem; color: var(--sumi-soft); }
+
+/* ---------- the compound in the scrolls ---------- */
+.cell__ex {
+  display: block;
+  margin-top: .35rem;
+  font-size: .74rem;
+  line-height: 1.6;
+  color: var(--sumi-soft);
+}
+.cell__ex i { font-style: italic; color: var(--ai); }

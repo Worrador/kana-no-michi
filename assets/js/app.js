@@ -9,6 +9,7 @@
    'typingForm','typingInput','feedback','stationKanji','stationRomaji','stationLine','stationGo',
    'fortuneJp','fortuneRomaji','fortuneGloss','tally','missedWrap','missedList','againBtn',
    'teachCount','teachJp','teachReading','teachReadings','teachMeaning','teachHint','teachBack','teachNext',
+   'teachRule','teachExample','studyRule',
    'studyTabs','studyNote','studyChart','totals','progressList','resetBtn'].forEach(function (id) {
     el[id] = $(id);
   });
@@ -27,6 +28,20 @@
     lastConfig: null,
     teachIndex: 0
   };
+
+  /* The one rule that makes kanji readings tractable, and the honest caveat. */
+  const YOMI_RULE =
+    '<h3><span class="jp">音と訓</span> <span class="en">which reading, and when</span></h3>' +
+    '<ul>' +
+      '<li><b>Standing alone</b>, or with a hiragana tail, a kanji takes its <b>訓 kun</b> ' +
+        'reading — the native Japanese word. 山 <i>yama</i>, 見る <i>miru</i>.</li>' +
+      '<li><b>Joined to another kanji</b>, it takes its <b>音 on</b> reading — the one ' +
+        'borrowed from Chinese. 火山 <i>kazan</i>, 大学 <i>daigaku</i>.</li>' +
+    '</ul>' +
+    '<p>That is a strong tendency, not a law. 手紙 is two kanji and still reads ' +
+    '<i>tegami</i>, both kun. Compounds often voice the second part as well — ' +
+    '小 + 川 becomes <i>o-gawa</i>. You will meet the exceptions one word at a time; ' +
+    'the rule is what makes the rest predictable.</p>';
 
   /* ---------------- screen routing ---------------- */
   function show(name) {
@@ -155,6 +170,24 @@
 
     el.teachMeaning.textContent =
       (it.en && it.en !== it.reading) ? it.en : (deck.kind === 'kana' ? 'A sound, not a word.' : '');
+
+    /* the compound puts the other reading family to work */
+    if (it.ex) {
+      el.teachExample.hidden = false;
+      el.teachExample.innerHTML =
+        '<span class="example__label">joined to another kanji</span>' +
+        '<span class="example__row"><b>' + escapeHtml(it.ex[0]) + '</b>' +
+        '<i>' + escapeHtml(it.ex[1]) + '</i></span>' +
+        '<span class="example__en">' + escapeHtml(it.ex[2]) + '</span>';
+    } else {
+      el.teachExample.hidden = true;
+      el.teachExample.innerHTML = '';
+    }
+
+    /* the rule itself, once, on the first card of a batch that contains kanji */
+    const hasKanji = s.batch.some(function (b) { return KM.deckOfItem[b.id].kind === 'kanji'; });
+    el.teachRule.hidden = !(hasKanji && state.teachIndex === 0);
+    if (!el.teachRule.hidden && !el.teachRule.innerHTML) el.teachRule.innerHTML = YOMI_RULE;
     el.teachHint.textContent = it.hint || '';
     el.teachHint.hidden = !it.hint;
 
@@ -407,6 +440,8 @@
 
     const deck = KM.deckById[state.studyDeck];
     el.studyNote.textContent = deck.note;
+    el.studyRule.hidden = deck.kind !== 'kanji';
+    if (!el.studyRule.hidden && !el.studyRule.innerHTML) el.studyRule.innerHTML = YOMI_RULE;
     const wide = deck.kind === 'phrase';
     el.studyChart.className = 'chart chart--' + (wide ? 2 : deck.columns);
     el.studyChart.innerHTML = deck.items.map(function (it) {
@@ -418,6 +453,8 @@
         (it.on || it.kun ? '<span class="cell__yomi">音 ' + escapeHtml(it.on || '—') +
           ' · 訓 ' + escapeHtml(it.kun || '—') + '</span>' : '') +
         (it.en && it.en !== it.reading ? '<span class="cell__en">' + escapeHtml(it.en) + '</span>' : '') +
+        (it.ex ? '<span class="cell__ex">' + escapeHtml(it.ex[0]) + ' <i>' +
+          escapeHtml(it.ex[1]) + '</i> ' + escapeHtml(it.ex[2]) + '</span>' : '') +
         (it.hint ? '<span class="cell__hint">' + escapeHtml(it.hint) + '</span>' : '') +
         '<span class="cell__bar"><i style="width:' + pct + '%"></i></span>' +
         '</div>';

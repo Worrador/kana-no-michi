@@ -54,6 +54,16 @@ small green bar under each entry showing how well it has settled in.
   Japanese, and which one surfaces depends on the company the character keeps — 山
   alone is *yama*, but in 火山 it is *-zan*. Each entry also gives the pictographic
   origin, because 川 stops being arbitrary once you see the three lines of water.
+
+  **The rule for which reading to use is stated outright**, on the first card of any
+  kanji lesson and above every kanji chart in the scrolls: alone or with a hiragana
+  tail a character takes its kun reading, joined to another kanji it takes its on
+  reading — with the honest caveat that this is a strong tendency and not a law.
+  Every kanji then carries a compound chosen to show the *other* family at work, so
+  the rule is demonstrated rather than asserted: 山 *yama* but 富士山 *Fujisan*, 火山
+  *kazan*. The awkward cases are included deliberately — 手紙 *tegami* is two kanji and
+  still kun, 九月 is *ku*gatsu and not *kyuu*, and 小川 shows a compound voicing its
+  second half into *o-gawa*.
 - **語彙 Words (162)** — food, people and family, nature, everyday things, verbs,
   adjectives, time and colour, numbers. Roughly JLPT N5 in scope, with kanji shown
   where a beginner would really meet it.

@@ -22,10 +22,14 @@ At the end you are handed an **omikuji** — the paper fortune drawn at a shrine
 except this one is earned rather than drawn. 大吉 for a near-perfect walk, 凶 if
 the lanterns failed you.
 
-## Two ways to walk it
+## Three ways to walk it
+
+It teaches before it tests. **手習い Learn** is the way in, and the other two are what
+you do once you have something to practise.
 
 | | |
 |---|---|
+| **手習い Learn** | Takes the five signs you know least well, **shows** each one first — reading, meaning, and a note on where its shape came from — then asks only those five until every one comes back correct twice. Nothing is timed against you. |
 | **旅 Journey** | Five stations, thirty questions, four lanterns, a score and a fortune at the end. |
 | **稽古 Practice** | No lanterns and no finish line. The scheduler picks whatever you are weakest at and keeps handing it to you. It ends only when you press **やめる Quit** — and you still get your tally and a fortune. |
 
@@ -34,10 +38,22 @@ small green bar under each entry showing how well it has settled in.
 
 ## What it teaches
 
-**410 items** across 18 roads.
+**481 items** across 23 roads.
 
 - **仮名 Kana (208)** — hiragana and katakana, each in three roads: the 46 basic
   signs, the 25 voiced forms (`か → が`), and the 33 glides (`き + ゃ → きゃ`).
+  Every one of the 92 basic signs carries a mnemonic for its shape, including the
+  distinctions that actually catch people out — シ sweeps **up** from the lower left,
+  ツ sweeps **down** from the top. The notes for the marked and glided kana are
+  *derived* rather than written: a voiced sign sits one code point after its plain
+  form in Unicode, so が knows it is か with two strokes.
+- **漢字 Kanji (71)** — numbers, nature, the body, position, and everyday life. The
+  word lists already show kanji incidentally, as the spelling of a word; these teach
+  the character itself, and specifically the thing that makes kanji hard: **two
+  families of reading**. 音 *on'yomi* came from Chinese, 訓 *kun'yomi* is native
+  Japanese, and which one surfaces depends on the company the character keeps — 山
+  alone is *yama*, but in 火山 it is *-zan*. Each entry also gives the pictographic
+  origin, because 川 stops being arbitrary once you see the three lines of water.
 - **語彙 Words (162)** — food, people and family, nature, everyday things, verbs,
   adjectives, time and colour, numbers. Roughly JLPT N5 in scope, with kanji shown
   where a beginner would really meet it.
@@ -46,7 +62,9 @@ small green bar under each entry showing how well it has settled in.
   is actually said, which is usually the harder half.
 
 Questions come in both directions — sign to sound, sound to sign, word to meaning,
-meaning to word — so you are never just pattern-matching one column of a table.
+meaning to word — so you are never just pattern-matching one column of a table. Kanji
+are asked for their readings as well as their meanings, since knowing 山 means
+"mountain" is only half of knowing it.
 
 Tick **書く** and kana roads stop offering choices: you type the reading. It accepts
 the common alternative romanisations, so `si`, `tu`, `hu`, `sya` and `nn` are all
@@ -74,8 +92,9 @@ Everything on screen is generated — there is not one image file in this reposi
   concentric arcs.
 - The prompt hangs in a **掛軸 kakejiku** scroll: brocade silk mount, a slim batten
   above and a weighted, capped roller below.
-- A correct answer presses a vermilion **判子 hanko** seal over the scroll, in
-  `multiply` blend so it soaks into the paper like real cinnabar ink.
+- A correct answer presses a green **判子 hanko** seal over the scroll, in `multiply`
+  blend so it soaks into the paper; a wrong one presses the same seal in vermilion.
+  Green passes, red does not — the chosen answer is outlined to match.
 - The timer is a stick of **線香 incense** with a live ember that flares as it runs low.
 - Cherry petals drift down the background on a canvas, and stop entirely if you have
   asked your system for reduced motion.
@@ -118,9 +137,9 @@ npx serve .
 **Keys.** `1`–`4` choose an answer, `Enter` walks on from a station, `Esc` leaves
 the road.
 
-**A first run.** Take 旅に出る, tick only **ひらがな 五十音**, and leave 書く unticked —
-recognising a sign is much easier than producing it from nothing, and there is no point
-being timed on both at once.
+**A first run.** Take **手習い Learn**, tick only **ひらがな 五十音**, and leave 書く
+unticked. Five signs will be shown to you and then drilled. Repeat that a few times, and
+only then set out on 旅 — the road is a test, and it expects you to bring something to it.
 
 ## Layout
 
@@ -128,7 +147,8 @@ being timed on both at once.
 index.html              every screen, as plain sections
 assets/css/style.css    the whole look; patterns and textures are inline SVG
 assets/js/
-  data/kana.js          hiragana and katakana tables
+  data/kana.js          hiragana and katakana, with shape mnemonics
+  data/kanji.js         71 kanji with both reading families and their origins
   data/vocab.js         eight themed word lists
   data/phrases.js       set phrases, each with a note on when to say it
   storage.js            one localStorage key, versioned

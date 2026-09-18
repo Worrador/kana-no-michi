@@ -16,6 +16,8 @@
   --ai:         #2a4a6b;
   --kin:        #a8823a;
   --matcha:     #6d7c45;
+  --midori:     #2f7d4f;   /* 緑 — success */
+  --midori-dark:#1f5c39;
   --rule:       rgba(36, 31, 26, 0.16);
   --rule-soft:  rgba(36, 31, 26, 0.09);
   --shadow:     0 1px 0 rgba(255,255,255,.7), 0 10px 26px -14px rgba(50,38,26,.55);
@@ -43,6 +45,8 @@
   --ai:         #7fa3c9;
   --kin:        #d5ae5c;
   --matcha:     #9aab68;
+  --midori:     #4f9e6c;
+  --midori-dark:#2f6b47;
   --rule:       rgba(233, 222, 200, 0.2);
   --rule-soft:  rgba(233, 222, 200, 0.1);
   --shadow:     0 1px 0 rgba(255,255,255,.04), 0 14px 30px -16px rgba(0,0,0,.85);
@@ -600,8 +604,8 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   font-family: var(--font-jp);
   font-size: 3.2rem;
   color: #fdf3e4;
-  background: var(--shu);
-  border: 4px solid #8f2c21;
+  background: var(--midori);
+  border: 4px solid var(--midori-dark);
   border-radius: 8px;
   opacity: 0;
   pointer-events: none;
@@ -610,7 +614,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
 }
 :root[data-theme="night"] .stamp { mix-blend-mode: screen; }
 .stamp.is-shown { animation: stampIn .5s var(--ease) forwards; }
-.stamp.is-wrong { background: var(--sumi); border-color: #000; }
+.stamp.is-wrong { background: var(--shu); border-color: #8f2c21; }
 @keyframes stampIn {
   0%   { opacity: 0; transform: translate(-50%,-50%) rotate(-22deg) scale(1.8); filter: blur(4px); }
   35%  { opacity: .94; transform: translate(-50%,-50%) rotate(-10deg) scale(.96); filter: none; }
@@ -656,12 +660,15 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
 .answer:hover:not(:disabled) { transform: translateY(-2px); border-color: var(--shu); }
 .answer:disabled { cursor: default; }
 .answer.is-right {
-  border-color: var(--matcha);
-  background: linear-gradient(0deg, rgba(109,124,69,.16), rgba(109,124,69,.16)), var(--paper);
+  border-color: var(--midori);
+  background: linear-gradient(0deg, rgba(47,125,79,.16), rgba(47,125,79,.16)), var(--paper);
+  box-shadow: inset 0 0 0 1px var(--midori);
 }
 .answer.is-wrong {
   border-color: var(--shu);
-  opacity: .8;
+  background: linear-gradient(0deg, rgba(178,58,44,.14), rgba(178,58,44,.14)), var(--paper);
+  box-shadow: inset 0 0 0 1px var(--shu);
+  opacity: .9;
   animation: shake .4s var(--ease);
 }
 .answer.is-dim { opacity: .35; }
@@ -700,6 +707,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   max-width: 32rem;
 }
 .feedback b { font-family: var(--font-jp); font-size: 1.25rem; color: var(--shu); font-weight: 500; }
+.feedback.is-right b { color: var(--midori); }
 .feedback i { font-style: italic; color: var(--sumi-faint); }
 
 /* ---------- 宿場 station interstitial ---------- */
@@ -873,3 +881,102 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
 
 /* An author display rule outranks the UA sheet's [hidden], so say it explicitly. */
 [hidden] { display: none !important; }
+
+/* ---------- 手習い the teaching card ---------- */
+.lesson {
+  position: relative;
+  max-width: 34rem;
+  margin: 1.8rem auto;
+  text-align: center;
+}
+.lesson__count {
+  margin: 0 0 .8rem;
+  font-size: .74rem;
+  letter-spacing: .3em;
+  text-transform: uppercase;
+  color: var(--sumi-faint);
+}
+.lesson__card {
+  position: relative;
+  padding: 2.4rem 1.6rem 2rem;
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  box-shadow: var(--shadow-lift);
+}
+.lesson__card::before {
+  content: "";
+  position: absolute;
+  inset: 6px;
+  border: 1px solid var(--rule-soft);
+  pointer-events: none;
+}
+.lesson__card::after {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--midori) 0 33%, var(--kin) 33% 66%, var(--ai) 66% 100%);
+  opacity: .75;
+}
+.lesson__jp {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: clamp(4.5rem, 22vw, 8rem);
+  line-height: 1.1;
+  letter-spacing: .04em;
+  animation: inkIn .6s var(--ease) both;
+}
+.lesson__jp.is-long { font-size: clamp(1.8rem, 8vw, 3rem); letter-spacing: .08em; line-height: 1.5; }
+.lesson__reading {
+  margin: .6rem 0 0;
+  font-size: 1.3rem;
+  font-style: italic;
+  letter-spacing: .12em;
+  color: var(--ai);
+}
+.lesson__readings {
+  display: flex;
+  justify-content: center;
+  gap: 1.6rem;
+  margin: 1.1rem 0 0;
+  padding-top: 1rem;
+  border-top: 1px solid var(--rule-soft);
+}
+.lesson__readings div { display: flex; flex-direction: column; gap: .25rem; }
+.lesson__readings dt { font-size: .68rem; letter-spacing: .16em; text-transform: uppercase; color: var(--sumi-faint); }
+.lesson__readings dd { margin: 0; font-family: var(--font-jp); font-size: 1.25rem; letter-spacing: .1em; }
+.lesson__meaning {
+  margin: 1rem 0 0;
+  font-size: 1.05rem;
+  color: var(--sumi);
+}
+.lesson__hint {
+  margin: 1.2rem auto 0;
+  max-width: 24rem;
+  padding: .7rem .9rem;
+  background: var(--paper-warm);
+  border-left: 2px solid var(--kin);
+  font-style: italic;
+  font-size: .9rem;
+  line-height: 1.75;
+  color: var(--sumi-soft);
+  text-align: left;
+}
+.lesson__actions { display: flex; gap: .7rem; justify-content: center; margin-top: 1.4rem; }
+.lesson__actions .btn { min-width: 9rem; }
+.lesson__foot {
+  margin-top: 1.4rem;
+  font-size: .8rem;
+  line-height: 1.8;
+  color: var(--sumi-faint);
+}
+
+/* both reading families, in the scrolls */
+.cell__yomi {
+  display: block;
+  margin-top: .25rem;
+  font-family: var(--font-jp);
+  font-size: .72rem;
+  letter-spacing: .06em;
+  color: var(--sumi-soft);
+}

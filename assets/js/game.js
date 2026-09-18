@@ -8,7 +8,7 @@
   KM.deckOfItem = {};
 
   KM.initData = function () {
-    KM.decks = [].concat(KM.DATA.kana, KM.DATA.vocab, KM.DATA.phrases);
+    KM.decks = [].concat(KM.DATA.kana, KM.DATA.kanji, KM.DATA.vocab, KM.DATA.phrases);
     KM.decks.forEach(function (d) {
       KM.deckById[d.id] = d;
       d.items.forEach(function (it) {
@@ -53,10 +53,17 @@
   const STATION_LENGTH = 6;
   const LIVES = 4;
 
+  /* Meaning alone is not enough for kanji — the readings are the hard part, so they
+     get asked too. Phrases stay on meaning; a whole sentence in romaji reads badly
+     as a button. */
   function pickDirection(deck, typing) {
-    if (typing && (deck.kind === 'kana')) return 'jp2read';
-    if (deck.kind === 'kana') return Math.random() < 0.6 ? 'jp2read' : 'read2jp';
-    return Math.random() < 0.55 ? 'jp2en' : 'en2jp';
+    if (typing && deck.kind === 'kana') return 'jp2read';
+    const r = Math.random();
+    if (deck.kind === 'kana')  return r < 0.6  ? 'jp2read' : 'read2jp';
+    if (deck.kind === 'kanji') return r < 0.38 ? 'jp2en' : r < 0.62 ? 'en2jp'
+                                    : r < 0.88 ? 'jp2read' : 'read2jp';
+    if (deck.kind === 'word')  return r < 0.44 ? 'jp2en' : r < 0.78 ? 'en2jp' : 'jp2read';
+    return r < 0.55 ? 'jp2en' : 'en2jp';
   }
 
   function faceFor(item, deck, dir, side) {
@@ -69,14 +76,22 @@
   }
 
   const LABELS = {
-    jp2read: { kana: 'How is this kana read?', word: 'Read this aloud', phrase: 'Read this aloud' },
-    read2jp: { kana: 'Which kana is this?', word: 'Which word is this?', phrase: 'Which phrase is this?' },
-    jp2en: { kana: 'What does this mean?', word: 'What does this word mean?', phrase: 'What does this phrase mean?' },
-    en2jp: { kana: 'Which kana?', word: 'Which word says this?', phrase: 'Which phrase says this?' }
+    jp2read: { kana: 'How is this kana read?', kanji: 'How is this kanji read?',
+               word: 'Read this aloud', phrase: 'Read this aloud' },
+    read2jp: { kana: 'Which kana is this?', kanji: 'Which kanji is read this way?',
+               word: 'Which word is this?', phrase: 'Which phrase is this?' },
+    jp2en:   { kana: 'What does this mean?', kanji: 'What does this kanji mean?',
+               word: 'What does this word mean?', phrase: 'What does this phrase mean?' },
+    en2jp:   { kana: 'Which kana?', kanji: 'Which kanji means this?',
+               word: 'Which word says this?', phrase: 'Which phrase says this?' }
   };
 
   function buildQuestion(session) {
-    const pool = session.pool;
+    let pool = session.pool;
+    if (session.need) {
+      const owed = pool.filter(function (it) { return session.need[it.id] > 0; });
+      if (owed.length) pool = owed;
+    }
     const item = weightedPick(pool, session.lastId);
     const deck = KM.deckOfItem[item.id];
     const dir = pickDirection(deck, session.typing);
@@ -91,7 +106,7 @@
       label: LABELS[dir][deck.kind],
       prompt: faceFor(item, deck, dir, 'q'),
       answer: answer,
-      big: dir === 'read2jp' || dir === 'en2jp' ? false : deck.kind === 'kana',
+      big: dir === 'read2jp' || dir === 'en2jp' ? false : (deck.kind === 'kana' || deck.kind === 'kanji'),
       sub: '',
       choices: []
     };
@@ -159,6 +174,56 @@
     STATIONS: STATIONS,
     STATION_LENGTH: STATION_LENGTH,
 
+    /* 手習い — take the five signs you know least well, to be shown before they are asked.
+       Each must come back correct twice; a miss adds one back to its tally. */
+    startLesson: function (opts) {
+      const size = opts.size || 5;
+      let pool = [];
+      opts.deckIds.forEach(function (id) {
+        const d = KM.deckById[id];
+        if (d) pool = pool.concat(d.items);
+      });
+      const ranked = pool.slice().sort(function (a, b) {
+        const ra = KM.SRS.peek(a.id), rb = KM.SRS.peek(b.id);
+        return (ra ? ra.box + 1 : 0) - (rb ? rb.box + 1 : 0);
+      });
+      const batch = ranked.slice(0, size);
+      const need = {};
+      batch.forEach(function (it) { need[it.id] = 2; });
+
+      return {
+        mode: 'lesson',
+        deckIds: opts.deckIds.slice(),
+        pool: batch,
+        batch: batch,
+        need: need,
+        typing: false,
+        lastId: null,
+        total: Infinity,
+        asked: 0,
+        correct: 0,
+        score: 0,
+        combo: 0,
+        bestCombo: 0,
+        lives: Infinity,
+        missed: [],
+        stationErrors: 0,
+        relit: false,
+        startedAt: Date.now(),
+        current: null,
+        over: false,
+        failed: false
+      };
+    },
+
+    /* How many of the lesson batch are fully settled. */
+    learnedCount: function (session) {
+      if (!session.need) return 0;
+      let n = 0;
+      session.batch.forEach(function (it) { if (!session.need[it.id]) n++; });
+      return n;
+    },
+
     start: function (opts) {
       const deckIds = opts.deckIds.slice();
       let pool = [];
@@ -225,6 +290,16 @@
       }
       KM.Store.markDay();
 
+      if (session.need) {
+        const id = q.item.id;
+        session.need[id] = ok
+          ? Math.max(0, session.need[id] - 1)
+          : Math.min(3, session.need[id] + 1);
+        let owed = 0;
+        session.batch.forEach(function (it) { owed += session.need[it.id]; });
+        if (owed === 0) session.over = true;
+      }
+
       if (session.lives <= 0) { session.over = true; session.failed = true; }
       else if (session.asked >= session.total) { session.over = true; }
 
@@ -243,6 +318,7 @@
     },
 
     fortune: function (session) {
+      if (session.mode === 'lesson') return ['習得', 'Shuutoku', 'Learned by heart'];
       if (session.failed) return ['凶', 'Kyou', 'Turn back and walk it again'];
       const a = KM.Game.accuracy(session);
       for (let i = 0; i < FORTUNES.length; i++) {

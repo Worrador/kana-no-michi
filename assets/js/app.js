@@ -8,6 +8,7 @@
    'road','stationName','burn','kakejiku','promptLabel','prompt','promptSub','stamp','answers',
    'typingForm','typingInput','feedback','stationKanji','stationRomaji','stationLine','stationGo',
    'fortuneJp','fortuneRomaji','fortuneGloss','tally','missedWrap','missedList','againBtn',
+   'teachCount','teachJp','teachReading','teachReadings','teachMeaning','teachHint','teachBack','teachNext',
    'studyTabs','studyNote','studyChart','totals','progressList','resetBtn'].forEach(function (id) {
     el[id] = $(id);
   });
@@ -23,7 +24,8 @@
     deadline: 0,
     limit: 9000,
     studyDeck: null,
-    lastConfig: null
+    lastConfig: null,
+    teachIndex: 0
   };
 
   /* ---------------- screen routing ---------------- */
@@ -65,16 +67,23 @@
   function deckGroups() {
     return [
       { jp: '仮名', en: 'Kana', decks: KM.DATA.kana },
+      { jp: '漢字', en: 'Kanji', decks: KM.DATA.kanji },
       { jp: '語彙', en: 'Words', decks: KM.DATA.vocab },
       { jp: '表現', en: 'Phrases', decks: KM.DATA.phrases }
     ];
   }
 
   function renderPaths() {
-    el.pathsSubtitle.textContent = state.mode === 'journey' ? 'Choose your road' : 'Choose what to practise';
-    el.pathsNote.textContent = state.mode === 'journey'
-      ? 'Five post stations, six questions each, three lanterns. A wrong answer snuffs one out.'
-      : 'No lanterns and no finish line — it hands you whatever you are weakest at, for as long as you like. Press やめる Quit to stop, and you still get your tally and a fortune.';
+    el.pathsSubtitle.textContent = {
+      learn: 'Choose what to learn',
+      journey: 'Choose your road',
+      practice: 'Choose what to practise'
+    }[state.mode];
+    el.pathsNote.textContent = {
+      learn: 'Five signs at a time — the five you know least well. Each is shown to you with its reading and a note on where its shape came from, and only then asked, until every one comes back correct twice. Nothing is timed against you here.',
+      journey: 'Five post stations, six questions each, four lanterns. A wrong answer snuffs one out; a station walked clean relights one. Come here once you have learned a few signs.',
+      practice: 'No lanterns and no finish line — it hands you whatever you are weakest at, for as long as you like. Press やめる Quit to stop, and you still get your tally and a fortune.'
+    }[state.mode];
     el.optTyping.checked = !!KM.Store.settings().typing;
 
     let html = '';
@@ -108,11 +117,54 @@
   /* ---------------- the run ---------------- */
   function begin(config) {
     state.lastConfig = config;
-    state.session = KM.Game.start(config);
     KM.Audio.wake();
+
+    if (config.mode === 'learn') {
+      state.session = KM.Game.startLesson({ deckIds: config.deckIds, size: 5 });
+      state.teachIndex = 0;
+      return showTeach();
+    }
+
+    state.session = KM.Game.start(config);
     show('play');
     renderHud();
     nextQuestion();
+  }
+
+  /* ---------------- 手習い the teaching card ---------------- */
+  function showTeach() {
+    const s = state.session;
+    const it = s.batch[state.teachIndex];
+    const deck = KM.deckOfItem[it.id];
+
+    el.teachCount.textContent = (state.teachIndex + 1) + ' / ' + s.batch.length;
+    el.teachJp.textContent = it.jp;
+    el.teachJp.className = 'lesson__jp' + (it.jp.length > 3 ? ' is-long' : '');
+    el.teachReading.textContent = it.reading || '';
+
+    /* kanji carry two families of reading, and that distinction is the lesson */
+    if (it.on || it.kun) {
+      el.teachReadings.hidden = false;
+      el.teachReadings.innerHTML =
+        (it.on ? '<div><dt>音 on</dt><dd>' + escapeHtml(it.on) + '</dd></div>' : '') +
+        (it.kun ? '<div><dt>訓 kun</dt><dd>' + escapeHtml(it.kun) + '</dd></div>' : '');
+    } else {
+      el.teachReadings.hidden = true;
+      el.teachReadings.innerHTML = '';
+    }
+
+    el.teachMeaning.textContent =
+      (it.en && it.en !== it.reading) ? it.en : (deck.kind === 'kana' ? 'A sound, not a word.' : '');
+    el.teachHint.textContent = it.hint || '';
+    el.teachHint.hidden = !it.hint;
+
+    el.teachBack.disabled = state.teachIndex === 0;
+    el.teachNext.querySelector('.btn__jp').textContent =
+      state.teachIndex === s.batch.length - 1 ? '始める' : '次へ';
+    el.teachNext.querySelector('.btn__en').textContent =
+      state.teachIndex === s.batch.length - 1 ? 'Begin' : 'Next';
+
+    show('learn');
   }
 
   function renderHud() {
@@ -141,6 +193,14 @@
       const within = (s.asked % KM.Game.STATION_LENGTH) + 1;
       el.stationName.textContent = station.jp + ' · ' + station.en + ' — ' +
         Math.min(within, KM.Game.STATION_LENGTH) + ' / ' + KM.Game.STATION_LENGTH;
+    } else if (s.mode === 'lesson') {
+      const done = KM.Game.learnedCount(s);
+      let road = '';
+      s.batch.forEach(function (it) {
+        road += '<span class="step' + (s.need[it.id] ? '' : ' is-done') + '"></span>';
+      });
+      el.road.innerHTML = road;
+      el.stationName.textContent = '手習い · learning — ' + done + ' / ' + s.batch.length + ' settled';
     } else {
       el.road.innerHTML = '';
       el.stationName.textContent = '稽古 · practice — ' + s.asked +
@@ -155,6 +215,7 @@
     state.locked = false;
 
     el.stamp.className = 'stamp';
+    el.feedback.className = 'feedback';
     el.feedback.innerHTML = '&nbsp;';
     el.promptLabel.textContent = q.label;
 
@@ -244,6 +305,7 @@
 
     if (ok) KM.Audio.correct(s.combo); else KM.Audio.wrong();
 
+    el.feedback.className = 'feedback ' + (ok ? 'is-right' : 'is-wrong');
     el.feedback.innerHTML = feedbackHtml(q, ok, timedOut, given);
     renderHud();
 
@@ -297,12 +359,21 @@
 
     const acc = Math.round(KM.Game.accuracy(s) * 100);
     const mins = Math.max(1, Math.round((Date.now() - s.startedAt) / 60000));
-    el.tally.innerHTML =
-      row('点数', 'Score', s.score) +
-      row('的中', 'Accuracy', acc + '<small>%</small>') +
-      row('連続', 'Best run', s.bestCombo) +
-      row('問', 'Answered', s.correct + '<small>/' + s.asked + '</small>') +
-      row('時', 'Minutes', mins);
+    el.tally.innerHTML = s.mode === 'lesson'
+      ? row('新', 'Learned', s.batch.length) +
+        row('的中', 'Accuracy', acc + '<small>%</small>') +
+        row('問', 'Answered', s.correct + '<small>/' + s.asked + '</small>') +
+        row('時', 'Minutes', mins)
+      : row('点数', 'Score', s.score) +
+        row('的中', 'Accuracy', acc + '<small>%</small>') +
+        row('連続', 'Best run', s.bestCombo) +
+        row('問', 'Answered', s.correct + '<small>/' + s.asked + '</small>') +
+        row('時', 'Minutes', mins);
+
+    if (s.mode === 'lesson') {
+      el.fortuneGloss.textContent = s.batch.map(function (it) { return it.jp; }).join('  ') +
+        ' — now in the rotation. 稽古 Practice will keep bringing them back.';
+    }
 
     if (s.missed.length) {
       el.missedWrap.hidden = false;
@@ -316,6 +387,7 @@
       el.missedWrap.hidden = true;
     }
 
+    if (state.labelAgain) state.labelAgain(s.mode);
     if (s.failed) KM.Audio.wrong(); else KM.Audio.fanfare();
     state.session = null;
     show('result');
@@ -343,6 +415,8 @@
       return '<div class="cell' + (wide ? ' cell--wide' : '') + '">' +
         '<span class="cell__jp">' + escapeHtml(it.jp) + '</span>' +
         '<span class="cell__read">' + escapeHtml(it.reading || '') + '</span>' +
+        (it.on || it.kun ? '<span class="cell__yomi">音 ' + escapeHtml(it.on || '—') +
+          ' · 訓 ' + escapeHtml(it.kun || '—') + '</span>' : '') +
         (it.en && it.en !== it.reading ? '<span class="cell__en">' + escapeHtml(it.en) + '</span>' : '') +
         (it.hint ? '<span class="cell__hint">' + escapeHtml(it.hint) + '</span>' : '') +
         '<span class="cell__bar"><i style="width:' + pct + '%"></i></span>' +
@@ -543,6 +617,26 @@
       if (state.lastConfig) begin(state.lastConfig); else show('paths');
     });
 
+    function labelAgain(mode) {
+      el.againBtn.querySelector('.btn__jp').textContent = mode === 'learn' ? 'あと五つ' : 'もう一度';
+      el.againBtn.querySelector('.btn__en').textContent = mode === 'learn' ? 'Five more' : 'Again';
+    }
+    state.labelAgain = labelAgain;
+
+    el.teachBack.addEventListener('click', function () {
+      if (state.teachIndex > 0) { state.teachIndex--; KM.Audio.page(); showTeach(); }
+    });
+
+    el.teachNext.addEventListener('click', function () {
+      const s = state.session;
+      if (!s) return show('title');
+      KM.Audio.page();
+      if (state.teachIndex < s.batch.length - 1) { state.teachIndex++; return showTeach(); }
+      show('play');
+      renderHud();
+      nextQuestion();
+    });
+
     el.stationGo.addEventListener('click', function () {
       if (!state.session) return show('title');
       show('play');
@@ -574,6 +668,13 @@
       if (state.screen === 'station' && (e.key === 'Enter' || e.key === ' ')) {
         e.preventDefault();
         return el.stationGo.click();
+      }
+      if (state.screen === 'learn') {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') {
+          e.preventDefault();
+          return el.teachNext.click();
+        }
+        if (e.key === 'ArrowLeft') { e.preventDefault(); return el.teachBack.click(); }
       }
       if (e.key === 'Escape') {
         if (state.screen === 'play') return el.quitBtn.click();

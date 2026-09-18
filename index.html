@@ -49,7 +49,10 @@
           incense burns out, and the lanterns stay lit.
         </p>
         <div class="menu">
-          <button class="btn btn--primary" data-go="paths" data-mode="journey" type="button">
+          <button class="btn btn--primary" data-go="paths" data-mode="learn" type="button">
+            <span class="btn__jp">手習い</span><span class="btn__en">Learn — five new signs, taught first</span>
+          </button>
+          <button class="btn" data-go="paths" data-mode="journey" type="button">
             <span class="btn__jp">旅に出る</span><span class="btn__en">Set out on a journey</span>
           </button>
           <button class="btn" data-go="paths" data-mode="practice" type="button">
@@ -135,6 +138,25 @@
       <p class="feedback" id="feedback" role="status" aria-live="polite">&nbsp;</p>
     </section>
 
+    <!-- 手習い -->
+    <section class="screen" id="screen-learn">
+      <div class="lesson">
+        <p class="lesson__count" id="teachCount">1 / 5</p>
+        <div class="lesson__card">
+          <p class="lesson__jp" id="teachJp">あ</p>
+          <p class="lesson__reading" id="teachReading">a</p>
+          <dl class="lesson__readings" id="teachReadings"></dl>
+          <p class="lesson__meaning" id="teachMeaning"></p>
+          <p class="lesson__hint" id="teachHint"></p>
+        </div>
+        <div class="lesson__actions">
+          <button class="btn btn--ghost" id="teachBack" type="button"><span class="btn__jp">前へ</span><span class="btn__en">Back</span></button>
+          <button class="btn btn--primary" id="teachNext" type="button"><span class="btn__jp">次へ</span><span class="btn__en">Next</span></button>
+        </div>
+        <p class="lesson__foot">These five are shown once, then asked until each comes back correct twice.</p>
+      </div>
+    </section>
+
     <!-- 宿場 -->
     <section class="screen" id="screen-station">
       <div class="interstitial">
@@ -203,6 +225,7 @@
 </div>
 
 <script src="assets/js/data/kana.js"></script>
+<script src="assets/js/data/kanji.js"></script>
 <script src="assets/js/data/vocab.js"></script>
 <script src="assets/js/data/phrases.js"></script>
 <script src="assets/js/storage.js"></script>

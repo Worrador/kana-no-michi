@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>仮名の道 — Kana no Michi</title>
+<meta name="description" content="A quiet game for learning Japanese: kana, words and phrases along an old highway.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23f2ebdd'/%3E%3Cg fill='%23c1352b'%3E%3Crect x='3' y='6' width='26' height='3.2' rx='1.4'/%3E%3Crect x='5' y='11' width='22' height='2.4'/%3E%3Crect x='8' y='9' width='3.4' height='19'/%3E%3Crect x='20.6' y='9' width='3.4' height='19'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<canvas id="petals" aria-hidden="true"></canvas>
+
+<div class="page">
+  <header class="topbar">
+    <button class="brand" id="brandHome" type="button" title="Return to the gate">
+      <span class="brand__jp">仮名の道</span>
+      <span class="brand__en">Kana no Michi</span>
+    </button>
+    <div class="topbar__tools">
+      <button class="tool" id="toggleSound" type="button" aria-pressed="true" title="Sound">
+        音</button>
+      <button class="tool" id="toggleTheme" type="button" title="Day or night">
+        灯</button>
+    </div>
+  </header>
+
+  <main id="screens">
+
+    <!-- 表紙 -->
+    <section class="screen is-active" id="screen-title">
+      <div class="gate">
+        <svg class="torii" viewBox="0 0 240 180" aria-hidden="true">
+          <g fill="currentColor">
+            <path d="M14 26h212c4 0 6 3 5 7l-2 8c-1 4-4 6-8 6H27c-4 0-7-2-8-6l-2-8c-1-4 1-7 5-7z"/>
+            <rect x="34" y="58" width="172" height="11" rx="3"/>
+            <path d="M52 50h20l-5 118H57z"/>
+            <path d="M168 50h20l5 118h-15z"/>
+            <rect x="112" y="60" width="16" height="30" rx="2"/>
+          </g>
+        </svg>
+        <h1 class="title">
+          <span class="title__jp">仮名の道</span>
+          <span class="title__en">The Path of Kana</span>
+        </h1>
+        <p class="lede">
+          A long road, walked one sign at a time. Read what the scroll shows you before the
+          incense burns out, and the lanterns stay lit.
+        </p>
+        <div class="menu">
+          <button class="btn btn--primary" data-go="paths" data-mode="journey" type="button">
+            <span class="btn__jp">旅に出る</span><span class="btn__en">Set out on a journey</span>
+          </button>
+          <button class="btn" data-go="paths" data-mode="practice" type="button">
+            <span class="btn__jp">稽古</span><span class="btn__en">Practice, unhurried</span>
+          </button>
+          <button class="btn" data-go="study" type="button">
+            <span class="btn__jp">巻物</span><span class="btn__en">Scrolls — study the charts</span>
+          </button>
+          <button class="btn" data-go="records" type="button">
+            <span class="btn__jp">記録</span><span class="btn__en">Records</span>
+          </button>
+        </div>
+        <p class="streak" id="titleStreak"></p>
+      </div>
+    </section>
+
+    <!-- 道選び -->
+    <section class="screen" id="screen-paths">
+      <div class="sheet">
+        <h2 class="sheet__title"><span class="jp">道を選ぶ</span><span class="en" id="pathsSubtitle">Choose your road</span></h2>
+        <p class="sheet__note" id="pathsNote"></p>
+
+        <div class="options">
+          <label class="switch">
+            <input type="checkbox" id="optTyping">
+            <span class="switch__box" aria-hidden="true"></span>
+            <span class="switch__text"><b>書く</b> Type the reading instead of choosing<i>kana roads only</i></span>
+          </label>
+        </div>
+
+        <div class="decks" id="deckList"></div>
+
+        <div class="sheet__foot">
+          <p class="selection" id="selectionNote">Nothing chosen yet.</p>
+          <div class="sheet__actions">
+            <button class="btn btn--ghost" data-go="title" type="button"><span class="btn__jp">戻る</span><span class="btn__en">Back</span></button>
+            <button class="btn btn--primary" id="beginBtn" type="button" disabled><span class="btn__jp">出発</span><span class="btn__en">Depart</span></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 勝負 -->
+    <section class="screen screen--play" id="screen-play">
+      <div class="hud">
+        <div class="lanterns" id="lanterns" aria-label="Lanterns remaining"></div>
+        <div class="hud__center">
+          <span class="hud__stat"><i>点</i><b id="score">0</b></span>
+          <span class="hud__stat hud__stat--combo" id="comboWrap"><i>連</i><b id="combo">0</b></span>
+        </div>
+        <button class="link-btn" id="quitBtn" type="button">やめる <span>Quit</span></button>
+      </div>
+
+      <div class="road" id="road" aria-hidden="true"></div>
+      <p class="station-name" id="stationName"></p>
+
+      <div class="incense" aria-hidden="true">
+        <div class="incense__stick"><span class="incense__burn" id="burn"></span></div>
+      </div>
+
+      <div class="kakejiku" id="kakejiku">
+        <span class="kakejiku__cord" aria-hidden="true"></span>
+        <span class="kakejiku__rod kakejiku__rod--top" aria-hidden="true"></span>
+        <div class="kakejiku__silk">
+          <div class="kakejiku__paper">
+            <p class="prompt__label" id="promptLabel">&nbsp;</p>
+            <p class="prompt" id="prompt">&nbsp;</p>
+            <p class="prompt__sub" id="promptSub">&nbsp;</p>
+          </div>
+        </div>
+        <span class="kakejiku__rod kakejiku__rod--bottom" aria-hidden="true"></span>
+        <div class="stamp" id="stamp" aria-hidden="true">正</div>
+      </div>
+
+      <div class="answers" id="answers"></div>
+
+      <form class="typing" id="typingForm" hidden>
+        <input id="typingInput" type="text" inputmode="latin" autocomplete="off" autocapitalize="off"
+               spellcheck="false" placeholder="romaji" aria-label="Type the reading in romaji">
+        <button class="btn btn--primary" type="submit"><span class="btn__jp">答</span></button>
+      </form>
+
+      <p class="feedback" id="feedback" role="status" aria-live="polite">&nbsp;</p>
+    </section>
+
+    <!-- 宿場 -->
+    <section class="screen" id="screen-station">
+      <div class="interstitial">
+        <p class="interstitial__kanji" id="stationKanji">箱根</p>
+        <p class="interstitial__romaji" id="stationRomaji">Hakone</p>
+        <p class="interstitial__line" id="stationLine"></p>
+        <button class="btn btn--primary" id="stationGo" type="button"><span class="btn__jp">進む</span><span class="btn__en">Walk on</span></button>
+      </div>
+    </section>
+
+    <!-- 結果 -->
+    <section class="screen" id="screen-result">
+      <div class="omikuji">
+        <div class="omikuji__head">
+          <p class="omikuji__fortune" id="fortuneJp">大吉</p>
+          <p class="omikuji__romaji" id="fortuneRomaji">Dai-kichi</p>
+          <p class="omikuji__gloss" id="fortuneGloss">Great blessing</p>
+        </div>
+        <dl class="tally" id="tally"></dl>
+        <div class="missed" id="missedWrap" hidden>
+          <h3><span class="jp">覚え直し</span> <span class="en">To walk again</span></h3>
+          <div class="missed__list" id="missedList"></div>
+        </div>
+        <div class="sheet__actions">
+          <button class="btn btn--ghost" data-go="title" type="button"><span class="btn__jp">門へ</span><span class="btn__en">To the gate</span></button>
+          <button class="btn btn--primary" id="againBtn" type="button"><span class="btn__jp">もう一度</span><span class="btn__en">Again</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 巻物 -->
+    <section class="screen" id="screen-study">
+      <div class="sheet">
+        <h2 class="sheet__title"><span class="jp">巻物</span><span class="en">Scrolls</span></h2>
+        <p class="sheet__note">Everything the game can ask you, laid out plainly. Nothing here is timed.</p>
+        <div class="tabs" id="studyTabs"></div>
+        <p class="deck-note" id="studyNote"></p>
+        <div class="chart" id="studyChart"></div>
+        <div class="sheet__actions">
+          <button class="btn btn--ghost" data-go="title" type="button"><span class="btn__jp">戻る</span><span class="btn__en">Back</span></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 記録 -->
+    <section class="screen" id="screen-records">
+      <div class="sheet">
+        <h2 class="sheet__title"><span class="jp">記録</span><span class="en">Records</span></h2>
+        <div class="totals" id="totals"></div>
+        <h3 class="sub-head"><span class="jp">修行の程</span> <span class="en">Progress along each road</span></h3>
+        <div class="progress-list" id="progressList"></div>
+        <div class="sheet__actions">
+          <button class="btn btn--ghost" data-go="title" type="button"><span class="btn__jp">戻る</span><span class="btn__en">Back</span></button>
+          <button class="btn btn--danger" id="resetBtn" type="button"><span class="btn__jp">白紙に戻す</span><span class="btn__en">Erase all progress</span></button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>道は一歩から</span>
+    <span class="footer__sep">·</span>
+    <span>a road begins with one step</span>
+  </footer>
+</div>
+
+<script src="assets/js/data/kana.js"></script>
+<script src="assets/js/data/vocab.js"></script>
+<script src="assets/js/data/phrases.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/srs.js"></script>
+<script src="assets/js/audio.js"></script>
+<script src="assets/js/game.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>

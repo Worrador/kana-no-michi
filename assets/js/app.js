@@ -303,6 +303,7 @@
     }
 
     if (q.build) {
+      el.answers.className = 'answers';
       el.answers.innerHTML = '';
       el.typingForm.hidden = true;
       el.builder.hidden = false;
@@ -314,6 +315,8 @@
     } else {
       el.typingForm.hidden = true;
       const face = q.dir === 'jp2read' ? ' answer--romaji' : q.dir === 'jp2en' ? ' answer--latin' : '';
+      /* 似 — set them side by side and large enough to actually compare. */
+      el.answers.className = 'answers' + (q.duel ? ' is-duel' : '');
       el.answers.innerHTML = q.choices.map(function (c, i) {
         return '<button class="answer' + face + '" type="button" data-choice="' +
                escapeAttr(c) + '"><span class="answer__key">' + (i + 1) + '</span>' + escapeHtml(c) + '</button>';

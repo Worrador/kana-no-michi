@@ -1134,3 +1134,21 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
 .switch.is-disabled { opacity: .45; cursor: default; }
 .switch.is-disabled .switch__text i { color: var(--shu); font-style: normal; }
 .options { display: grid; gap: .75rem; }
+
+/* ---------- 似 the showdown: the confusable signs, side by side and large ---------- */
+.answers.is-duel {
+  grid-template-columns: repeat(auto-fit, minmax(5.4rem, 1fr));
+  gap: .5rem;
+}
+.answers.is-duel .answer {
+  padding: 1.5rem .4rem;
+  font-size: 3.2rem;
+  line-height: 1.05;
+  letter-spacing: 0;
+}
+.answers.is-duel .answer--romaji { font-size: 1.35rem; padding: 1.7rem .4rem; }
+.answers.is-duel .answer__key { top: .35rem; left: .5rem; }
+@media (max-width: 34rem) {
+  .answers.is-duel { grid-template-columns: repeat(auto-fit, minmax(4.4rem, 1fr)); }
+  .answers.is-duel .answer { font-size: 2.5rem; padding: 1.1rem .3rem; }
+}

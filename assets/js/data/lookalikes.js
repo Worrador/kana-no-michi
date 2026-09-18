@@ -60,33 +60,29 @@
     'ツ': 'Two dots at the TOP, sweep down from above.'
   };
 
-  /* A sign can sit in several sets — り is confused with い and with リ — so the
-     confusable pool for each one is the union of every set it belongs to. */
-  const pool = {};
+  /* A sign can sit in several sets — は is confused with ほ ま ば, and separately with
+     た な. Those are two different mistakes, so they are kept as two separate duels
+     rather than merged into one pool. A question draws one set and shows it whole. */
+  const belongs = {};
   const reading = {};
+  const order = [];
   SETS.forEach(function (set) {
     set.forEach(function (pair) {
+      if (!belongs[pair[0]]) { belongs[pair[0]] = []; order.push(pair[0]); }
       reading[pair[0]] = pair[1];
-      if (!pool[pair[0]]) pool[pair[0]] = {};
-      set.forEach(function (other) {
-        if (other[0] !== pair[0]) pool[pair[0]][other[0]] = other[1];
-      });
+      belongs[pair[0]].push(set.filter(function (o) { return o[0] !== pair[0]; }));
     });
   });
 
-  const items = [];
-  Object.keys(pool).forEach(function (ch) {
-    /* Only real kana become questions; the decoys still serve as wrong answers. */
-    const code = ch.charCodeAt(0);
-    if (code < 0x3040 || code > 0x30FF) return;
-    items.push({
+  const items = order.map(function (ch) {
+    return {
       id: 'lookalike:' + ch,
       jp: ch,
       reading: reading[ch],
       en: reading[ch],
       hint: NOTES[ch] || 'Look at what the other options do differently.',
-      confuse: Object.keys(pool[ch]).map(function (o) { return [o, pool[ch][o]]; })
-    });
+      sets: belongs[ch]
+    };
   });
 
   KM.DATA.lookalikes = [{

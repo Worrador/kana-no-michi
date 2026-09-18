@@ -132,17 +132,20 @@
       choices: []
     };
 
-    /* 似 — the whole point is that every wrong answer is a plausible mistake, so the
-       set supplies them. A set with only two members gives three choices, not four. */
-    if (item.confuse && (dir === 'jp2read' || dir === 'read2jp' || dir === 'listen2jp')) {
-      const faces = item.confuse.map(function (p) { return dir === 'jp2read' ? p[1] : p[0]; });
+    /* 似 — a showdown between exactly the signs that get mistaken for each other.
+       One set is drawn and shown whole: ぬ against め and の, or ね against れ and わ.
+       Sets are never merged, because は/ほ/ま/ば and た/な/は are different mistakes. */
+    if (item.sets && (dir === 'jp2read' || dir === 'read2jp' || dir === 'listen2jp')) {
+      const set = item.sets[Math.floor(Math.random() * item.sets.length)];
       const seen = {};
       seen[answer] = true;
       const others = [];
-      shuffle(faces.slice()).forEach(function (f) {
+      shuffle(set.slice()).forEach(function (p) {
+        const f = dir === 'jp2read' ? p[1] : p[0];
         if (f && !seen[f] && others.length < 3) { seen[f] = true; others.push(f); }
       });
       q.choices = shuffle(others.concat([answer]));
+      q.duel = true;
       return q;
     }
 

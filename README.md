@@ -38,11 +38,16 @@ small green bar under each entry showing how well it has settled in.
 
 ## What it teaches
 
-**615 items** across 29 roads.
+**597 items** across 29 roads.
 
-- **似た仮名 Lookalikes (73)** — the pairs that actually get confused, drilled only
+- **似た仮名 Lookalikes (55)** — the pairs that actually get confused, drilled only
   against each other. A normal question draws its wrong answers from the whole deck,
-  which is easy: め is obvious beside か. It is not obvious beside ぬ. Here every wrong
+  which is easy: め is obvious beside か. It is not obvious beside ぬ. Only signs that
+  share a structure and differ by one stroke, one loop or one direction are in here —
+  sets like つ/く/へ were cut, because those are merely all simple, which is not the
+  same thing as confusable. A sign with no genuine lookalike is not in the deck at all,
+  and a pair with only each other makes a straight two-way duel, which is the purest
+  form of it. Here every wrong
   answer is a sign you could genuinely mistake this one for — ぬ/め, シ/ツ/ソ/ン,
   ね/れ/わ, る/ろ/そ — and a set with only two members gives three choices rather than
   padding itself out with something irrelevant. Same-reading pairs like へ/ヘ are

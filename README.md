@@ -105,10 +105,20 @@ whichever way you are playing.
 | | |
 |---|---|
 | **choose** | See the sign, pick the sound — or the reverse. The default, in both directions. |
-| **書く type** | See the kana, type the romaji. Strongest recall. Accepts `si`, `tu`, `hu`, `sya`, `nn`. |
-| **聴く listen** | Hear it first, then pick the kana; nothing is shown until you answer. Uses the browser's own Japanese voice, and says so plainly when the machine has none installed rather than mispronouncing everything in an English one. |
+| **書く type** | Type the reading instead of choosing it. Strongest recall. Accepts `si`, `tu`, `hu`, `sya`, `nn`. Kana, kanji and word roads. |
+| **聴く listen** | Hear it first; nothing is shown until you answer. Uses the browser's own Japanese voice, and says so plainly when the machine has none installed rather than mispronouncing everything in an English one. Kana, word and phrase roads. |
 | **組む build** | Assemble the word from kana tiles, in order, with decoy tiles mixed in. Word roads only — a single kana is not a puzzle. |
-| **速 blitz** | Five seconds a question. Stacks with any road and any of the above. |
+| **速 blitz** | Five seconds a question. Applies to any road. |
+
+**They are also filters.** Ticking one narrows the road list to the roads it can apply
+to — tick 組む and only the word roads remain, since a single kana is not a puzzle to
+assemble. Roads already chosen that fall outside the filter are dropped from the
+selection, and a switch whose remaining roads would be none hides itself rather than
+offering nothing. 書く and 組む are two different ways of giving an answer and so are
+mutually exclusive; 聴く and 速 stack with either, which gives you *hear it and spell
+it* and *hear it and type it* for free. One table in `game.js` declares what applies
+where, and both the engine and the road list read it, so the list can never offer a
+road where a ticked switch would quietly do nothing.
 
 ## How it decides what to ask
 

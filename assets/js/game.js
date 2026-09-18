@@ -53,17 +53,38 @@
   const STATION_LENGTH = 6;
   const LIVES = 4;
 
+  /* Which kinds of road each switch can apply to. One table, read by the engine when
+     choosing a direction and by the road list when filtering itself. */
+  const APPLIES = {
+    typing: ['kana', 'kanji', 'word'],      /* everything with one romaji reading */
+    listen: ['kana', 'word', 'phrase'],     /* everything written in kana it can speak */
+    build:  ['word'],                       /* a single kana is not a puzzle */
+    blitz:  null                            /* a timer; applies to any road at all */
+  };
+
+  function applies(which, kind) {
+    return !APPLIES[which] || APPLIES[which].indexOf(kind) !== -1;
+  }
+
   /* Meaning alone is not enough for kanji — the readings are the hard part, so they
      get asked too. Phrases stay on meaning; a whole sentence in romaji reads badly
      as a button. */
   function pickDirection(deck, typing, session) {
-    /* 聴 — hear it, then pick the shape. Only where a reading exists to speak. */
-    if (session && session.listening && (deck.kind === 'kana' || deck.kind === 'word')) {
+    const k = deck.kind;
+    const listening = !!(session && session.listening) && applies('listen', k);
+    const building = !!(session && session.building) && applies('build', k);
+    const typed = !!typing && applies('typing', k);
+
+    /* 聴 replaces the shown prompt with the sound, so it needs a direction whose
+       question is the Japanese itself. It stacks with 組む and with 書く: hear it and
+       spell it, or hear it and type it. */
+    if (listening) {
+      if (building) return 'build';
+      if (typed) return 'jp2read';
       return 'listen2jp';
     }
-    /* 語 — assemble the word from kana tiles. Words only; a single kana is not a puzzle. */
-    if (session && session.building && deck.kind === 'word') return 'build';
-    if (typing && deck.kind === 'kana') return 'jp2read';
+    if (building) return 'build';
+    if (typed) return 'jp2read';
     const r = Math.random();
     if (deck.kind === 'kana')  return r < 0.6  ? 'jp2read' : 'read2jp';
     if (deck.kind === 'kanji') return r < 0.38 ? 'jp2en' : r < 0.62 ? 'en2jp'
@@ -119,8 +140,10 @@
       item: item,
       deck: deck,
       dir: dir,
-      typed: session.typing && deck.kind === 'kana' && dir === 'jp2read',
-      listen: dir === 'listen2jp',
+      typed: !!session.typing && applies('typing', deck.kind) && dir === 'jp2read',
+      listen: dir === 'listen2jp' ||
+              (!!session.listening && applies('listen', deck.kind) &&
+               (dir === 'build' || dir === 'jp2read')),
       build: dir === 'build',
       label: LABELS[dir][deck.kind],
       prompt: faceFor(item, deck, dir, 'q'),
@@ -427,6 +450,8 @@
       KM.Store.save();
     },
 
+    APPLIES: APPLIES,
+    applies: applies,
     shuffle: shuffle,
     checkTyped: checkTyped
   };

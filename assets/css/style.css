@@ -1152,3 +1152,14 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   .answers.is-duel { grid-template-columns: repeat(auto-fit, minmax(4.4rem, 1fr)); }
   .answers.is-duel .answer { font-size: 2.5rem; padding: 1.1rem .3rem; }
 }
+
+/* what the ticked switches have left of the list */
+.filter-note {
+  margin: 0 0 1rem;
+  padding: .6rem .8rem;
+  background: var(--paper-warm);
+  border-left: 2px solid var(--ai);
+  font-size: .82rem;
+  letter-spacing: .04em;
+  color: var(--sumi-soft);
+}

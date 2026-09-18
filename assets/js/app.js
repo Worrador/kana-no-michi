@@ -6,7 +6,7 @@
   ['screens','petals','brandHome','toggleSound','toggleMusic','toggleTheme','titleStreak','pathsSubtitle','pathsNote',
    'optTyping','optListen','optListenWrap','optListenNote','optBuild','optBlitz',
    'listenBtn','builder','builderSlots','builderTiles','builderClear','builderSubmit',
-   'deckList','selectionNote','beginBtn','lanterns','score','combo','comboWrap','quitBtn',
+   'filterNote','deckList','selectionNote','beginBtn','lanterns','score','combo','comboWrap','quitBtn',
    'road','stationName','burn','kakejiku','promptLabel','prompt','promptSub','stamp','answers',
    'typingForm','typingInput','feedback','stationKanji','stationRomaji','stationLine','stationGo',
    'fortuneJp','fortuneRomaji','fortuneGloss','tally','missedWrap','missedList','againBtn',
@@ -82,6 +82,41 @@
   }
 
   /* ---------------- deck picking ---------------- */
+  /* Each switch is a filter on the road list: tick it and only the roads it can apply
+     to remain. A switch whose own kinds no longer intersect what the others have left
+     is hidden outright, since offering it would be offering nothing. */
+  const SWITCHES = [
+    { key: 'typing', box: 'optTyping' },
+    { key: 'listen', box: 'optListen' },
+    { key: 'build',  box: 'optBuild' },
+    { key: 'blitz',  box: 'optBlitz' }
+  ];
+
+  function switchOn(sw) {
+    return el[sw.box].checked && !el[sw.box].disabled && !el[sw.box].closest('.switch').hidden;
+  }
+
+  /* null means no restriction at all. */
+  function kindsFor(keys) {
+    let kinds = null;
+    keys.forEach(function (key) {
+      const list = KM.Game.APPLIES[key];
+      if (!list) return;
+      kinds = kinds === null ? list.slice() : kinds.filter(function (k) { return list.indexOf(k) !== -1; });
+    });
+    return kinds;
+  }
+
+  function activeKeys(extra) {
+    const keys = SWITCHES.filter(switchOn).map(function (sw) { return sw.key; });
+    if (extra && keys.indexOf(extra) === -1) keys.push(extra);
+    return keys;
+  }
+
+  function decksMatching(kinds) {
+    return KM.decks.filter(function (d) { return !kinds || kinds.indexOf(d.kind) !== -1; });
+  }
+
   function deckGroups() {
     return [
       { jp: '仮名', en: 'Kana', decks: KM.DATA.kana },
@@ -110,22 +145,47 @@
     el.optBuild.checked = !!set.build;
     el.optBlitz.checked = !!set.blitz;
 
+    /* 聴く needs a voice the machine may not have. */
     const canSpeak = KM.Speech.available();
     el.optListen.disabled = !canSpeak;
-    el.optListenWrap.classList.toggle('is-disabled', !canSpeak);
     el.optListenNote.textContent = canSpeak
-      ? 'kana and word roads'
+      ? 'kana, word and phrase roads'
       : 'unavailable — this browser has no Japanese voice installed';
     if (!canSpeak) el.optListen.checked = false;
 
     el.optBlitz.disabled = state.mode === 'learn';
-    el.optBlitz.parentElement.classList.toggle('is-disabled', state.mode === 'learn');
+
+    /* Hide any switch that would leave the list empty, then filter by what is left. */
+    SWITCHES.forEach(function (sw) {
+      const row = el[sw.box].closest('.switch');
+      const others = SWITCHES.filter(function (o) { return o !== sw && switchOn(o); })
+                             .map(function (o) { return o.key; });
+      const possible = decksMatching(kindsFor(others.concat([sw.key]))).length;
+      row.hidden = possible === 0;
+      if (row.hidden) el[sw.box].checked = false;
+      row.classList.toggle('is-disabled', el[sw.box].disabled);
+    });
+
+    const kinds = kindsFor(activeKeys());
+    const visible = decksMatching(kinds);
+    const visibleIds = visible.map(function (d) { return d.id; });
+    state.selected = state.selected.filter(function (id) { return visibleIds.indexOf(id) !== -1; });
+
+    el.filterNote.hidden = !kinds;
+    if (kinds) {
+      const names = SWITCHES.filter(function (sw) { return switchOn(sw) && KM.Game.APPLIES[sw.key]; })
+        .map(function (sw) { return el[sw.box].closest('.switch').querySelector('b').textContent; });
+      el.filterNote.textContent = names.join(' + ') + ' — showing the ' + visible.length +
+        ' road' + (visible.length === 1 ? '' : 's') + ' it can apply to.';
+    }
 
     let html = '';
     deckGroups().forEach(function (group) {
+      const decks = group.decks.filter(function (d) { return visibleIds.indexOf(d.id) !== -1; });
+      if (!decks.length) return;
       html += '<h3 class="sub-head" style="grid-column:1/-1"><span class="jp">' + group.jp +
               '</span> <span class="en">' + group.en + '</span></h3>';
-      group.decks.forEach(function (d) {
+      decks.forEach(function (d) {
         const m = KM.SRS.mastery(d.items);
         const on = state.selected.indexOf(d.id) !== -1;
         html += '<button class="deck" type="button" data-deck="' + d.id + '" aria-pressed="' + on + '">' +
@@ -727,27 +787,34 @@
       if (wasOn) KM.Music.stop(); else KM.Music.start();
     });
 
-    el.optTyping.addEventListener('change', function () {
-      KM.Store.setSetting('typing', el.optTyping.checked);
-    });
-    el.optListen.addEventListener('change', function () {
-      KM.Store.setSetting('listen', el.optListen.checked);
-    });
-    el.optBuild.addEventListener('change', function () {
-      KM.Store.setSetting('build', el.optBuild.checked);
-    });
-    el.optBlitz.addEventListener('change', function () {
-      KM.Store.setSetting('blitz', el.optBlitz.checked);
-    });
+    function onSwitch(key, box, exclusiveWith) {
+      el[box].addEventListener('change', function () {
+        if (el[box].checked && exclusiveWith) {
+          el[exclusiveWith].checked = false;
+          KM.Store.setSetting(exclusiveWith === 'optTyping' ? 'typing' : 'build', false);
+        }
+        KM.Store.setSetting(key, el[box].checked);
+        KM.Audio.page();
+        renderPaths();
+      });
+    }
+    /* Typing and building are two different ways to give an answer; 聴く and 速 stack
+       with either. */
+    onSwitch('typing', 'optTyping', 'optBuild');
+    onSwitch('build', 'optBuild', 'optTyping');
+    onSwitch('listen', 'optListen', null);
+    onSwitch('blitz', 'optBlitz', null);
 
     el.beginBtn.addEventListener('click', function () {
+      const on = {};
+      SWITCHES.forEach(function (sw) { on[sw.key] = switchOn(sw); });
       begin({
         mode: state.mode,
         deckIds: state.selected.slice(),
-        typing: el.optTyping.checked,
-        listening: el.optListen.checked && !el.optListen.disabled,
-        building: el.optBuild.checked,
-        blitz: el.optBlitz.checked && state.mode !== 'learn'
+        typing: on.typing,
+        listening: on.listen,
+        building: on.build,
+        blitz: on.blitz && state.mode !== 'learn'
       });
     });
 

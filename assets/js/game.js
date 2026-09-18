@@ -206,7 +206,7 @@
         combo: 0,
         bestCombo: 0,
         lives: Infinity,
-        missed: [],
+        missed: {},
         stationErrors: 0,
         relit: false,
         startedAt: Date.now(),
@@ -245,7 +245,7 @@
         combo: 0,
         bestCombo: 0,
         lives: journey ? LIVES : Infinity,
-        missed: [],
+        missed: {},
         stationErrors: 0,
         relit: false,
         startedAt: Date.now(),
@@ -286,7 +286,15 @@
       } else {
         session.combo = 0;
         if (session.lives !== Infinity) session.lives--;
-        if (session.missed.length < 40) session.missed.push({ item: q.item, deck: q.deck, given: given });
+        /* One entry per item, counted — the same sign missed three times is one thing
+           to relearn, not three. */
+        const rec = session.missed[q.item.id];
+        if (rec) rec.count++;
+        else if (Object.keys(session.missed).length < 40) {
+          session.missed[q.item.id] = {
+            item: q.item, deck: q.deck, count: 1, order: session.asked
+          };
+        }
       }
       KM.Store.markDay();
 
@@ -311,6 +319,13 @@
         session.stationErrors = 0;
       }
       return ok;
+    },
+
+    /* Worst first: what you tripped over most is what to walk again first. */
+    misses: function (session) {
+      const list = [];
+      for (const id in session.missed) list.push(session.missed[id]);
+      return list.sort(function (a, b) { return (b.count - a.count) || (a.order - b.order); });
     },
 
     accuracy: function (session) {

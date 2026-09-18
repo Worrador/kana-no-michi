@@ -408,11 +408,13 @@
         ' — now in the rotation. 稽古 Practice will keep bringing them back.';
     }
 
-    if (s.missed.length) {
+    const misses = KM.Game.misses(s);
+    if (misses.length) {
       el.missedWrap.hidden = false;
-      el.missedList.innerHTML = s.missed.map(function (m) {
-        return '<div class="missed__item"><b>' + escapeHtml(m.item.jp) + '</b><span>' +
-               escapeHtml(m.item.reading || '') +
+      el.missedList.innerHTML = misses.map(function (m) {
+        return '<div class="missed__item"><b>' + escapeHtml(m.item.jp) +
+               (m.count > 1 ? '<em class="missed__count">missed ' + m.count + '×</em>' : '') +
+               '</b><span>' + escapeHtml(m.item.reading || '') +
                (m.item.en && m.item.en !== m.item.reading ? ' — ' + escapeHtml(m.item.en) : '') +
                '</span></div>';
       }).join('');

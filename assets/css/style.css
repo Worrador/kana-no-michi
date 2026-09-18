@@ -1032,3 +1032,14 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   color: var(--sumi-soft);
 }
 .cell__ex i { font-style: italic; color: var(--ai); }
+
+/* how many times one item tripped you up */
+.missed__item b { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
+.missed__count {
+  font-family: var(--font-ui);
+  font-style: normal;
+  font-size: .68rem;
+  letter-spacing: .08em;
+  color: var(--shu);
+  white-space: nowrap;
+}

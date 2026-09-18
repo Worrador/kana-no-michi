@@ -254,7 +254,8 @@
 
     el.prompt.className = 'prompt';
     if (q.big) el.prompt.classList.add('is-huge');
-    if (q.dir === 'read2jp' || q.dir === 'en2jp') el.prompt.classList.add('is-latin');
+    if (q.dir === 'read2jp') el.prompt.classList.add('is-romaji');
+    else if (q.dir === 'en2jp') el.prompt.classList.add('is-latin');
     /* re-trigger the ink animation */
     el.prompt.style.animation = 'none';
     el.prompt.offsetHeight;
@@ -273,9 +274,9 @@
       el.typingInput.focus();
     } else {
       el.typingForm.hidden = true;
-      const latin = q.dir === 'jp2read' || q.dir === 'jp2en';
+      const face = q.dir === 'jp2read' ? ' answer--romaji' : q.dir === 'jp2en' ? ' answer--latin' : '';
       el.answers.innerHTML = q.choices.map(function (c, i) {
-        return '<button class="answer' + (latin ? ' answer--latin' : '') + '" type="button" data-choice="' +
+        return '<button class="answer' + face + '" type="button" data-choice="' +
                escapeAttr(c) + '"><span class="answer__key">' + (i + 1) + '</span>' + escapeHtml(c) + '</button>';
       }).join('');
     }
@@ -413,7 +414,11 @@
       el.missedWrap.hidden = false;
       el.missedList.innerHTML = misses.map(function (m) {
         return '<div class="missed__item"><b>' + escapeHtml(m.item.jp) +
-               (m.count > 1 ? '<em class="missed__count">missed ' + m.count + '×</em>' : '') +
+               '<em class="missed__count' + (m.count === m.of ? ' is-cold' : '') + '">' +
+               (m.count === m.of
+                  ? (m.count > 1 ? m.count + '× wrong, never right' : 'wrong')
+                  : m.count + ' wrong of ' + m.of) +
+               '</em>' +
                '</b><span>' + escapeHtml(m.item.reading || '') +
                (m.item.en && m.item.en !== m.item.reading ? ' — ' + escapeHtml(m.item.en) : '') +
                '</span></div>';

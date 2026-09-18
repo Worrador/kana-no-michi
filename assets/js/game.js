@@ -207,6 +207,7 @@
         bestCombo: 0,
         lives: Infinity,
         missed: {},
+        seen: {},
         stationErrors: 0,
         relit: false,
         startedAt: Date.now(),
@@ -246,6 +247,7 @@
         bestCombo: 0,
         lives: journey ? LIVES : Infinity,
         missed: {},
+        seen: {},
         stationErrors: 0,
         relit: false,
         startedAt: Date.now(),
@@ -270,6 +272,7 @@
       const ok = q.typed ? checkTyped(given, q.answer) : given === q.answer;
 
       session.asked++;
+      session.seen[q.item.id] = (session.seen[q.item.id] || 0) + 1;
       KM.SRS.grade(q.item.id, ok);
       const stats = KM.Store.stats();
       stats.answers++;
@@ -324,8 +327,17 @@
     /* Worst first: what you tripped over most is what to walk again first. */
     misses: function (session) {
       const list = [];
-      for (const id in session.missed) list.push(session.missed[id]);
-      return list.sort(function (a, b) { return (b.count - a.count) || (a.order - b.order); });
+      for (const id in session.missed) {
+        const m = session.missed[id];
+        m.of = session.seen[id] || m.count;     /* how many times it came round at all */
+        list.push(m);
+      }
+      /* Most misses first; a tie goes to whichever you got right less often. */
+      return list.sort(function (a, b) {
+        return (b.count - a.count) ||
+               ((b.count / b.of) - (a.count / a.of)) ||
+               (a.order - b.order);
+      });
     },
 
     accuracy: function (session) {

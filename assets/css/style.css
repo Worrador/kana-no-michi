@@ -24,10 +24,19 @@
   --shadow-lift:0 1px 0 rgba(255,255,255,.8), 0 18px 34px -16px rgba(50,38,26,.6);
   --tex-op:     .5;
 
-  --font-jp: "Yu Mincho", YuMincho, "Hiragino Mincho ProN", "Hiragino Mincho Pro",
-             "Noto Serif JP", "Source Han Serif JP", "MS Mincho", serif;
+  /* Japanese: a mincho (serif) face, best available. BIZ UDPMincho and Yu Mincho ship
+     with Windows, Hiragino with macOS, Noto elsewhere. MS Mincho is the last resort. */
+  --font-jp: "BIZ UDPMincho", "Yu Mincho", YuMincho, "YuMincho",
+             "Hiragino Mincho ProN", "Hiragino Mincho Pro",
+             "Noto Serif JP", "Noto Serif CJK JP", "Source Han Serif JP",
+             "MS PMincho", "MS Mincho", serif;
+  /* Latin prose: an old-style serif to sit beside the mincho. */
   --font-ui: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua",
-             Georgia, "Times New Roman", serif;
+             "Sitka Text", Charter, "Bitstream Charter", Georgia, "Times New Roman", serif;
+  /* Romaji only — transliteration wants unambiguous letterforms, the way a scholarly
+     gloss is set apart from the text it glosses. Fira Code if you have it. */
+  --font-romaji: "Fira Code", "JetBrains Mono", "Cascadia Code", "Cascadia Mono",
+                 ui-monospace, "SF Mono", "Segoe UI Mono", Consolas, "Liberation Mono", monospace;
 
   --ease: cubic-bezier(.2, .7, .3, 1);
 }
@@ -85,6 +94,12 @@ body {
 :root[data-theme="night"] body { background-blend-mode: normal, multiply, overlay; }
 
 .jp, .btn__jp, .brand__jp { font-family: var(--font-jp); }
+
+/* Proportional kana metrics: Japanese set with Latin-style fixed advances looks gappy. */
+.jp, .btn__jp, .brand__jp, .prompt, .lesson__jp, .cell__jp, .title__jp,
+.interstitial__kanji, .omikuji__fortune, .stamp, .example__row b {
+  font-feature-settings: "palt" 1;
+}
 
 h1, h2, h3 { font-weight: 500; margin: 0; }
 
@@ -588,6 +603,12 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
 }
 .prompt.is-huge { font-size: clamp(4rem, 20vw, 7.5rem); letter-spacing: .02em; }
 .prompt.is-latin { font-family: var(--font-ui); font-style: italic; font-size: clamp(1.6rem, 6vw, 2.6rem); }
+.prompt.is-romaji {
+  font-family: var(--font-romaji);
+  font-style: normal;
+  font-size: clamp(1.5rem, 5.5vw, 2.4rem);
+  letter-spacing: .02em;
+}
 .prompt__sub { margin: 0; font-size: .85rem; color: var(--sumi-faint); min-height: 1.2em; letter-spacing: .06em; }
 
 @keyframes inkIn {
@@ -646,6 +667,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   animation: riseIn .35s var(--ease) both;
 }
 .answer--latin { font-family: var(--font-ui); font-size: 1.02rem; letter-spacing: .02em; }
+.answer--romaji { font-family: var(--font-romaji); font-size: .98rem; letter-spacing: .01em; }
 .answer:nth-child(2) { animation-delay: .04s; }
 .answer:nth-child(3) { animation-delay: .08s; }
 .answer:nth-child(4) { animation-delay: .12s; }
@@ -688,9 +710,9 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   border: 1px solid var(--rule);
   border-bottom: 2px solid var(--sumi-faint);
   border-radius: 2px;
-  font-family: var(--font-ui);
-  font-size: 1.2rem;
-  letter-spacing: .1em;
+  font-family: var(--font-romaji);
+  font-size: 1.15rem;
+  letter-spacing: .04em;
   color: var(--sumi);
 }
 .typing input::placeholder { color: var(--sumi-faint); opacity: .55; font-style: italic; }
@@ -775,7 +797,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   font-size: .85rem;
 }
 .missed__item b { font-family: var(--font-jp); font-size: 1.15rem; font-weight: 500; display: block; }
-.missed__item span { color: var(--sumi-faint); }
+.missed__item span { font-family: var(--font-romaji); font-size: .78rem; color: var(--sumi-faint); }
 
 /* ---------- 巻物 study ---------- */
 .tabs { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: 1.1rem; }
@@ -807,7 +829,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   border-radius: 2px;
 }
 .cell__jp { display: block; font-family: var(--font-jp); font-size: 1.5rem; line-height: 1.3; }
-.cell__read { display: block; font-size: .75rem; color: var(--shu); letter-spacing: .08em; margin-top: .15rem; }
+.cell__read { display: block; font-family: var(--font-romaji); font-size: .72rem; color: var(--shu); letter-spacing: .02em; margin-top: .2rem; }
 .cell__en { display: block; font-size: .75rem; color: var(--sumi-faint); margin-top: .2rem; line-height: 1.5; }
 .cell__hint { display: block; font-size: .72rem; color: var(--sumi-faint); font-style: italic; margin-top: .35rem; line-height: 1.6; }
 .cell--wide { text-align: left; padding: .8rem .9rem; }
@@ -929,8 +951,9 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
 .lesson__jp.is-long { font-size: clamp(1.8rem, 8vw, 3rem); letter-spacing: .08em; line-height: 1.5; }
 .lesson__reading {
   margin: .6rem 0 0;
-  font-size: 1.3rem;
-  font-style: italic;
+  font-family: var(--font-romaji);
+  font-size: 1.15rem;
+  font-style: normal;
   letter-spacing: .12em;
   color: var(--ai);
 }
@@ -997,7 +1020,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
 .rule li { margin-bottom: .45rem; font-size: .88rem; line-height: 1.8; color: var(--sumi-soft); }
 .rule li b { color: var(--sumi); font-weight: 500; }
 .rule p { margin: 0; font-size: .84rem; line-height: 1.8; color: var(--sumi-faint); }
-.rule i { font-style: italic; color: var(--ai); }
+.rule i { font-family: var(--font-romaji); font-style: normal; font-size: .92em; color: var(--ai); }
 
 /* ---------- the compound on a teaching card ---------- */
 .example {
@@ -1020,7 +1043,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   margin-top: .4rem;
 }
 .example__row b { font-family: var(--font-jp); font-size: 1.9rem; font-weight: 500; letter-spacing: .06em; }
-.example__row i { font-style: italic; font-size: 1.05rem; color: var(--ai); letter-spacing: .08em; }
+.example__row i { font-family: var(--font-romaji); font-style: normal; font-size: .98rem; color: var(--ai); letter-spacing: .02em; }
 .example__en { display: block; margin-top: .3rem; font-size: .85rem; color: var(--sumi-soft); }
 
 /* ---------- the compound in the scrolls ---------- */
@@ -1031,7 +1054,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   line-height: 1.6;
   color: var(--sumi-soft);
 }
-.cell__ex i { font-style: italic; color: var(--ai); }
+.cell__ex i { font-family: var(--font-romaji); font-style: normal; font-size: .95em; color: var(--ai); }
 
 /* how many times one item tripped you up */
 .missed__item b { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
@@ -1043,3 +1066,7 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   color: var(--shu);
   white-space: nowrap;
 }
+
+/* an item you never once got right reads louder than one you merely fumbled */
+.missed__count.is-cold { color: var(--shu); font-weight: 500; }
+.missed__count:not(.is-cold) { color: var(--sumi-faint); }

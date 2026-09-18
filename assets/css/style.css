@@ -1070,3 +1070,67 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
 /* an item you never once got right reads louder than one you merely fumbled */
 .missed__count.is-cold { color: var(--shu); font-weight: 500; }
 .missed__count:not(.is-cold) { color: var(--sumi-faint); }
+
+/* ---------- 聴 the listening prompt ---------- */
+.listen {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+  margin: 0 auto;
+  padding: .9rem 1.4rem;
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  cursor: pointer;
+  color: var(--sumi);
+  transition: all .2s var(--ease);
+}
+.listen:hover { border-color: var(--ai); color: var(--ai); }
+.listen__mark { font-family: var(--font-jp); font-size: 2rem; line-height: 1; }
+.listen__hint { font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; color: var(--sumi-faint); }
+.prompt.is-muted { color: var(--sumi-faint); opacity: .4; letter-spacing: .3em; }
+
+/* ---------- 語 the word builder ---------- */
+.builder { width: min(32rem, 100%); margin: 0 auto; }
+.builder__slots {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: .4rem;
+  min-height: 3.6rem;
+  margin-bottom: 1.1rem;
+  cursor: pointer;
+}
+.slot {
+  width: 3rem; height: 3.4rem;
+  display: grid; place-items: center;
+  font-family: var(--font-jp);
+  font-size: 1.7rem;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule-soft);
+  border-bottom: 2px solid var(--rule);
+  border-radius: 2px;
+}
+.slot.is-filled { border-bottom-color: var(--ai); background: var(--paper); }
+.builder__tiles { display: flex; justify-content: center; flex-wrap: wrap; gap: .45rem; }
+.tile {
+  width: 3.1rem; height: 3.4rem;
+  font-family: var(--font-jp);
+  font-size: 1.6rem;
+  color: var(--sumi);
+  background: var(--paper);
+  border: 1px solid var(--rule);
+  border-radius: 2px;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform .15s var(--ease), border-color .15s var(--ease);
+}
+.tile:hover:not(:disabled) { transform: translateY(-3px); border-color: var(--shu); }
+.tile:disabled { opacity: .25; box-shadow: none; cursor: default; }
+.builder__actions { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-top: 1.2rem; }
+
+/* a switch the machine cannot honour */
+.switch.is-disabled { opacity: .45; cursor: default; }
+.switch.is-disabled .switch__text i { color: var(--shu); font-style: normal; }
+.options { display: grid; gap: .75rem; }

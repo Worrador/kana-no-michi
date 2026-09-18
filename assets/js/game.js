@@ -8,7 +8,7 @@
   KM.deckOfItem = {};
 
   KM.initData = function () {
-    KM.decks = [].concat(KM.DATA.kana, KM.DATA.kanji, KM.DATA.signs, KM.DATA.vocab, KM.DATA.phrases);
+    KM.decks = [].concat(KM.DATA.kana, KM.DATA.lookalikes, KM.DATA.kanji, KM.DATA.signs, KM.DATA.vocab, KM.DATA.phrases);
     KM.decks.forEach(function (d) {
       KM.deckById[d.id] = d;
       d.items.forEach(function (it) {
@@ -56,7 +56,13 @@
   /* Meaning alone is not enough for kanji — the readings are the hard part, so they
      get asked too. Phrases stay on meaning; a whole sentence in romaji reads badly
      as a button. */
-  function pickDirection(deck, typing) {
+  function pickDirection(deck, typing, session) {
+    /* 聴 — hear it, then pick the shape. Only where a reading exists to speak. */
+    if (session && session.listening && (deck.kind === 'kana' || deck.kind === 'word')) {
+      return 'listen2jp';
+    }
+    /* 語 — assemble the word from kana tiles. Words only; a single kana is not a puzzle. */
+    if (session && session.building && deck.kind === 'word') return 'build';
     if (typing && deck.kind === 'kana') return 'jp2read';
     const r = Math.random();
     if (deck.kind === 'kana')  return r < 0.6  ? 'jp2read' : 'read2jp';
@@ -70,14 +76,21 @@
 
   function faceFor(item, deck, dir, side) {
     const want = (side === 'q')
-      ? { jp2read: 'jp', read2jp: 'read', jp2en: 'jp', en2jp: 'en' }[dir]
-      : { jp2read: 'read', read2jp: 'jp', jp2en: 'en', en2jp: 'jp' }[dir];
+      ? { jp2read: 'jp', read2jp: 'read', jp2en: 'jp', en2jp: 'en',
+          listen2jp: 'read', build: 'en' }[dir]
+      : { jp2read: 'read', read2jp: 'jp', jp2en: 'en', en2jp: 'jp',
+          listen2jp: 'jp', build: 'jp' }[dir];
     if (want === 'jp') return item.jp;
     if (want === 'read') return item.reading;
     return item.en;
   }
 
   const LABELS = {
+    listen2jp: { kana: 'Listen, then choose the kana', kanji: 'Listen, then choose',
+                 sign: 'Listen, then choose', word: 'Listen, then choose the word',
+                 phrase: 'Listen, then choose' },
+    build:     { kana: 'Spell it', kanji: 'Spell it', sign: 'Spell it',
+                 word: 'Spell this word in kana', phrase: 'Spell it' },
     jp2read: { kana: 'How is this kana read?', kanji: 'How is this kanji read?',
                sign: 'How is this sign read?', word: 'Read this aloud', phrase: 'Read this aloud' },
     read2jp: { kana: 'Which kana is this?', kanji: 'Which kanji is read this way?',
@@ -98,7 +111,7 @@
     }
     const item = weightedPick(pool, session.lastId);
     const deck = KM.deckOfItem[item.id];
-    const dir = pickDirection(deck, session.typing);
+    const dir = pickDirection(deck, session.typing, session);
     session.lastId = item.id;
 
     const answer = faceFor(item, deck, dir, 'a');
@@ -106,16 +119,51 @@
       item: item,
       deck: deck,
       dir: dir,
-      typed: session.typing && deck.kind === 'kana',
+      typed: session.typing && deck.kind === 'kana' && dir === 'jp2read',
+      listen: dir === 'listen2jp',
+      build: dir === 'build',
       label: LABELS[dir][deck.kind],
       prompt: faceFor(item, deck, dir, 'q'),
       answer: answer,
-      big: dir === 'read2jp' || dir === 'en2jp' ? false
+      big: dir === 'read2jp' || dir === 'en2jp' || dir === 'build' ? false
              : (deck.kind === 'kana' || deck.kind === 'kanji' ||
                 (deck.kind === 'sign' && item.jp.length === 1)),
       sub: '',
       choices: []
     };
+
+    /* 似 — the whole point is that every wrong answer is a plausible mistake, so the
+       set supplies them. A set with only two members gives three choices, not four. */
+    if (item.confuse && (dir === 'jp2read' || dir === 'read2jp' || dir === 'listen2jp')) {
+      const faces = item.confuse.map(function (p) { return dir === 'jp2read' ? p[1] : p[0]; });
+      const seen = {};
+      seen[answer] = true;
+      const others = [];
+      shuffle(faces.slice()).forEach(function (f) {
+        if (f && !seen[f] && others.length < 3) { seen[f] = true; others.push(f); }
+      });
+      q.choices = shuffle(others.concat([answer]));
+      return q;
+    }
+
+    /* 語 — the tiles are the word's own kana, shuffled, with a few plausible extras. */
+    if (dir === 'build') {
+      const letters = (item.kana || item.jp).split('');
+      const extras = [];
+      const deckPool = deck.items;
+      while (extras.length < 3) {
+        const other = deckPool[Math.floor(Math.random() * deckPool.length)];
+        const src = (other.kana || other.jp).split('');
+        const pick = src[Math.floor(Math.random() * src.length)];
+        if (pick && letters.indexOf(pick) === -1 && extras.indexOf(pick) === -1) extras.push(pick);
+        if (deckPool.length < 4) break;
+      }
+      q.target = letters;
+      q.tiles = shuffle(letters.concat(extras));
+      q.answer = letters.join('');
+      q.choices = [];
+      return q;
+    }
 
     /* On an English prompt for a word, show the reading as a whisper under the answer later. */
     if (!q.typed) {
@@ -204,6 +252,9 @@
         batch: batch,
         need: need,
         typing: false,
+        listening: !!opts.listening,
+        building: !!opts.building,
+        blitz: false,
         lastId: null,
         total: Infinity,
         asked: 0,
@@ -244,6 +295,9 @@
         deckIds: deckIds,
         pool: pool,
         typing: !!opts.typing,
+        listening: !!opts.listening,
+        building: !!opts.building,
+        blitz: !!opts.blitz,
         lastId: null,
         total: journey ? STATIONS.length * STATION_LENGTH : Infinity,
         asked: 0,

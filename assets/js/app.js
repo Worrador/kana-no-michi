@@ -4,7 +4,9 @@
   const $ = function (id) { return document.getElementById(id); };
   const el = {};
   ['screens','petals','brandHome','toggleSound','toggleMusic','toggleTheme','titleStreak','pathsSubtitle','pathsNote',
-   'optTyping','deckList','selectionNote','beginBtn','lanterns','score','combo','comboWrap','quitBtn',
+   'optTyping','optListen','optListenWrap','optListenNote','optBuild','optBlitz',
+   'listenBtn','builder','builderSlots','builderTiles','builderClear','builderSubmit',
+   'deckList','selectionNote','beginBtn','lanterns','score','combo','comboWrap','quitBtn',
    'road','stationName','burn','kakejiku','promptLabel','prompt','promptSub','stamp','answers',
    'typingForm','typingInput','feedback','stationKanji','stationRomaji','stationLine','stationGo',
    'fortuneJp','fortuneRomaji','fortuneGloss','tally','missedWrap','missedList','againBtn',
@@ -26,7 +28,8 @@
     limit: 9000,
     studyDeck: null,
     lastConfig: null,
-    teachIndex: 0
+    teachIndex: 0,
+    built: []
   };
 
   /* The one rule that makes kanji readings tractable, and the honest caveat. */
@@ -82,6 +85,7 @@
   function deckGroups() {
     return [
       { jp: '仮名', en: 'Kana', decks: KM.DATA.kana },
+      { jp: '似た仮名', en: 'Lookalikes', decks: KM.DATA.lookalikes },
       { jp: '漢字', en: 'Kanji', decks: KM.DATA.kanji },
       { jp: '旅の漢字', en: 'Signs on the road', decks: KM.DATA.signs },
       { jp: '語彙', en: 'Words', decks: KM.DATA.vocab },
@@ -100,7 +104,22 @@
       journey: 'Five post stations, six questions each, four lanterns. A wrong answer snuffs one out; a station walked clean relights one. Come here once you have learned a few signs.',
       practice: 'No lanterns and no finish line — it hands you whatever you are weakest at, for as long as you like. Press やめる Quit to stop, and you still get your tally and a fortune.'
     }[state.mode];
-    el.optTyping.checked = !!KM.Store.settings().typing;
+    const set = KM.Store.settings();
+    el.optTyping.checked = !!set.typing;
+    el.optListen.checked = !!set.listen;
+    el.optBuild.checked = !!set.build;
+    el.optBlitz.checked = !!set.blitz;
+
+    const canSpeak = KM.Speech.available();
+    el.optListen.disabled = !canSpeak;
+    el.optListenWrap.classList.toggle('is-disabled', !canSpeak);
+    el.optListenNote.textContent = canSpeak
+      ? 'kana and word roads'
+      : 'unavailable — this browser has no Japanese voice installed';
+    if (!canSpeak) el.optListen.checked = false;
+
+    el.optBlitz.disabled = state.mode === 'learn';
+    el.optBlitz.parentElement.classList.toggle('is-disabled', state.mode === 'learn');
 
     let html = '';
     deckGroups().forEach(function (group) {
@@ -136,7 +155,10 @@
     KM.Audio.wake();
 
     if (config.mode === 'learn') {
-      state.session = KM.Game.startLesson({ deckIds: config.deckIds, size: 5 });
+      state.session = KM.Game.startLesson({
+        deckIds: config.deckIds, size: 5,
+        listening: config.listening, building: config.building
+      });
       state.teachIndex = 0;
       return showTeach();
     }
@@ -268,8 +290,24 @@
 
     el.typingInput.value = '';
     el.typingInput.disabled = false;
+    el.builder.hidden = true;
+    el.listenBtn.hidden = true;
+    state.built = [];
 
-    if (q.typed) {
+    /* 聴 — the question is the sound; nothing is shown until it is answered. */
+    if (q.listen) {
+      el.prompt.textContent = '⋯';
+      el.prompt.classList.add('is-muted');
+      el.listenBtn.hidden = false;
+      KM.Speech.say(q.item.kana || q.item.jp);
+    }
+
+    if (q.build) {
+      el.answers.innerHTML = '';
+      el.typingForm.hidden = true;
+      el.builder.hidden = false;
+      drawBuilder(q);
+    } else if (q.typed) {
       el.answers.innerHTML = '';
       el.typingForm.hidden = false;
       el.typingInput.focus();
@@ -282,8 +320,33 @@
       }).join('');
     }
 
-    startTimer(q.typed ? 13000 : 9500);
+    const limit = state.session.blitz ? (q.build ? 9000 : 5000)
+                : q.build ? 20000
+                : q.typed ? 13000
+                : q.listen ? 11000
+                : 9500;
+    startTimer(limit);
     renderHud();
+  }
+
+  /* ---------------- 語 the word builder ---------------- */
+  /* state.built holds tile indices; this turns them into the word so far. */
+  function builtWord(q) {
+    return state.built.map(function (i) { return q.tiles[i]; }).join('');
+  }
+
+  function drawBuilder(q) {
+    el.builderSlots.innerHTML = q.target.map(function (_, i) {
+      const idx = state.built[i];
+      return '<span class="slot' + (idx === undefined ? '' : ' is-filled') + '">' +
+             escapeHtml(idx === undefined ? '' : q.tiles[idx]) + '</span>';
+    }).join('');
+    el.builderTiles.innerHTML = q.tiles.map(function (t, i) {
+      const used = state.built.indexOf(i) !== -1;
+      return '<button class="tile" type="button" data-tile="' + i + '"' +
+             (used ? ' disabled' : '') + '>' + escapeHtml(t) + '</button>';
+    }).join('');
+    el.builderSubmit.disabled = state.built.length !== q.target.length;
   }
 
   function escapeHtml(s) {
@@ -334,6 +397,15 @@
       else buttons[i].classList.add('is-dim');
     }
     if (q.typed) el.typingInput.disabled = true;
+
+    if (q.listen) {
+      el.prompt.classList.remove('is-muted');
+      el.prompt.textContent = q.item.jp;
+    }
+    if (q.build) {
+      el.builderSubmit.disabled = true;
+      el.builderTiles.querySelectorAll('.tile').forEach(function (t) { t.disabled = true; });
+    }
 
     el.stamp.textContent = ok ? '正' : timedOut ? '時' : '否';
     el.stamp.className = 'stamp is-shown' + (ok ? '' : ' is-wrong');
@@ -655,9 +727,25 @@
     el.optTyping.addEventListener('change', function () {
       KM.Store.setSetting('typing', el.optTyping.checked);
     });
+    el.optListen.addEventListener('change', function () {
+      KM.Store.setSetting('listen', el.optListen.checked);
+    });
+    el.optBuild.addEventListener('change', function () {
+      KM.Store.setSetting('build', el.optBuild.checked);
+    });
+    el.optBlitz.addEventListener('change', function () {
+      KM.Store.setSetting('blitz', el.optBlitz.checked);
+    });
 
     el.beginBtn.addEventListener('click', function () {
-      begin({ mode: state.mode, deckIds: state.selected.slice(), typing: el.optTyping.checked });
+      begin({
+        mode: state.mode,
+        deckIds: state.selected.slice(),
+        typing: el.optTyping.checked,
+        listening: el.optListen.checked && !el.optListen.disabled,
+        building: el.optBuild.checked,
+        blitz: el.optBlitz.checked && state.mode !== 'learn'
+      });
     });
 
     el.againBtn.addEventListener('click', function () {
@@ -669,6 +757,39 @@
       el.againBtn.querySelector('.btn__en').textContent = mode === 'learn' ? 'Five more' : 'Again';
     }
     state.labelAgain = labelAgain;
+
+    el.builderTiles.addEventListener('click', function (e) {
+      const t = e.target.closest('[data-tile]');
+      if (!t || t.disabled || state.locked) return;
+      const q = state.q;
+      if (state.built.length >= q.target.length) return;
+      state.built.push(parseInt(t.getAttribute('data-tile'), 10));
+      KM.Audio.page();
+      drawBuilder(q);
+    });
+
+    el.builderSlots.addEventListener('click', function () {
+      if (state.locked || !state.built.length) return;
+      state.built.pop();
+      drawBuilder(state.q);
+    });
+
+    el.builderClear.addEventListener('click', function () {
+      if (state.locked) return;
+      state.built = [];
+      drawBuilder(state.q);
+    });
+
+    el.builderSubmit.addEventListener('click', function () {
+      if (state.locked || !state.q || !state.q.build) return;
+      if (state.built.length !== state.q.target.length) return;
+      submit(builtWord(state.q));
+    });
+
+    el.listenBtn.addEventListener('click', function () {
+      if (!state.q) return;
+      KM.Speech.say(state.q.item.kana || state.q.item.jp);
+    });
 
     el.teachBack.addEventListener('click', function () {
       if (state.teachIndex > 0) { state.teachIndex--; KM.Audio.page(); showTeach(); }

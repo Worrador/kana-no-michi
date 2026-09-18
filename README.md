@@ -38,8 +38,15 @@ small green bar under each entry showing how well it has settled in.
 
 ## What it teaches
 
-**518 items** across 27 roads.
+**614 items** across 29 roads.
 
+- **似た仮名 Lookalikes (72)** — the pairs that actually get confused, drilled only
+  against each other. A normal question draws its wrong answers from the whole deck,
+  which is easy: め is obvious beside か. It is not obvious beside ぬ. Here every wrong
+  answer is a sign you could genuinely mistake this one for — ぬ/め, シ/ツ/ソ/ン,
+  ね/れ/わ, る/ろ/そ — and a set with only two members gives three choices rather than
+  padding itself out with something irrelevant. Same-reading pairs like へ/ヘ are
+  deliberately excluded, because "which one is *he*?" has two right answers.
 - **仮名 Kana (208)** — hiragana and katakana, each in three roads: the 46 basic
   signs, the 25 voiced forms (`か → が`), and the 33 glides (`き + ゃ → きゃ`).
   Every one of the 92 basic signs carries a mnemonic for its shape, including the
@@ -84,6 +91,19 @@ are asked for their readings as well as their meanings, since knowing 山 means
 Tick **書く** and kana roads stop offering choices: you type the reading. It accepts
 the common alternative romanisations, so `si`, `tu`, `hu`, `sya` and `nn` are all
 fine.
+
+## Ways of being asked
+
+The same memory engine feeds all of them, so an item you are weak at resurfaces
+whichever way you are playing.
+
+| | |
+|---|---|
+| **choose** | See the sign, pick the sound — or the reverse. The default, in both directions. |
+| **書く type** | See the kana, type the romaji. Strongest recall. Accepts `si`, `tu`, `hu`, `sya`, `nn`. |
+| **聴く listen** | Hear it first, then pick the kana; nothing is shown until you answer. Uses the browser's own Japanese voice, and says so plainly when the machine has none installed rather than mispronouncing everything in an English one. |
+| **組む build** | Assemble the word from kana tiles, in order, with decoy tiles mixed in. Word roads only — a single kana is not a puzzle. |
+| **速 blitz** | Five seconds a question. Stacks with any road and any of the above. |
 
 ## How it decides what to ask
 
@@ -164,6 +184,7 @@ assets/css/fonts.css    Noto Serif JP, subset and inlined as a data URI
 assets/css/style.css    the whole look; patterns and textures are inline SVG
 assets/js/
   data/kana.js          hiragana and katakana, with shape mnemonics
+  data/lookalikes.js    confusable sets, each drilled only against itself
   data/kanji.js         71 kanji with both reading families and their origins
   data/signs.js         37 signs for travelling, recognised by meaning alone
   data/vocab.js         eight themed word lists

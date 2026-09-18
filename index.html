@@ -82,6 +82,21 @@
             <span class="switch__box" aria-hidden="true"></span>
             <span class="switch__text"><b>書く</b> Type the reading instead of choosing<i>kana roads only</i></span>
           </label>
+          <label class="switch" id="optListenWrap">
+            <input type="checkbox" id="optListen">
+            <span class="switch__box" aria-hidden="true"></span>
+            <span class="switch__text"><b>聴く</b> Hear it first, then choose the kana<i id="optListenNote">kana and word roads</i></span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="optBuild">
+            <span class="switch__box" aria-hidden="true"></span>
+            <span class="switch__text"><b>組む</b> Build the word from kana tiles<i>word roads only</i></span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="optBlitz">
+            <span class="switch__box" aria-hidden="true"></span>
+            <span class="switch__text"><b>速</b> Blitz — five seconds a question<i>journey and practice only</i></span>
+          </label>
         </div>
 
         <div class="decks" id="deckList"></div>
@@ -120,6 +135,9 @@
         <div class="kakejiku__silk">
           <div class="kakejiku__paper">
             <p class="prompt__label" id="promptLabel">&nbsp;</p>
+            <button class="listen" id="listenBtn" type="button" hidden aria-label="Play the sound again">
+              <span class="listen__mark">聴</span><span class="listen__hint">tap to hear it again</span>
+            </button>
             <p class="prompt" id="prompt">&nbsp;</p>
             <p class="prompt__sub" id="promptSub">&nbsp;</p>
           </div>
@@ -129,6 +147,15 @@
       </div>
 
       <div class="answers" id="answers"></div>
+
+      <div class="builder" id="builder" hidden>
+        <div class="builder__slots" id="builderSlots"></div>
+        <div class="builder__tiles" id="builderTiles"></div>
+        <div class="builder__actions">
+          <button class="link-btn" id="builderClear" type="button">消す <span>Clear</span></button>
+          <button class="btn btn--primary" id="builderSubmit" type="button"><span class="btn__jp">答</span></button>
+        </div>
+      </div>
 
       <form class="typing" id="typingForm" hidden>
         <input id="typingInput" type="text" inputmode="latin" autocomplete="off" autocapitalize="off"
@@ -229,6 +256,7 @@
 </div>
 
 <script src="assets/js/data/kana.js"></script>
+<script src="assets/js/data/lookalikes.js"></script>
 <script src="assets/js/data/kanji.js"></script>
 <script src="assets/js/data/signs.js"></script>
 <script src="assets/js/data/vocab.js"></script>

@@ -245,6 +245,48 @@
     bus.gain.exponentialRampToValueAtTime(Math.max(0.0001, target), t + seconds);
   }
 
+  /* ================= 聴 — speech, for the listening drill =================
+     Uses the browser's own Japanese voice. Not every machine has one: Windows needs
+     the Japanese language pack installed, so this reports honestly whether it can
+     speak rather than mispronouncing everything in an English voice. */
+  let jaVoice = null, voicesReady = false;
+
+  function findVoice() {
+    if (!window.speechSynthesis) return null;
+    const list = window.speechSynthesis.getVoices() || [];
+    voicesReady = list.length > 0;
+    jaVoice = null;
+    for (let i = 0; i < list.length; i++) {
+      if ((list[i].lang || '').toLowerCase().indexOf('ja') === 0) { jaVoice = list[i]; break; }
+    }
+    return jaVoice;
+  }
+
+  if (window.speechSynthesis) {
+    findVoice();
+    window.speechSynthesis.addEventListener('voiceschanged', findVoice);
+  }
+
+  KM.Speech = {
+    available: function () {
+      if (!window.speechSynthesis) return false;
+      if (!voicesReady) findVoice();
+      return !!jaVoice;
+    },
+    say: function (text) {
+      if (!window.speechSynthesis || !text) return false;
+      if (!jaVoice) findVoice();
+      if (!jaVoice) return false;
+      window.speechSynthesis.cancel();
+      const u = new window.SpeechSynthesisUtterance(text);
+      u.voice = jaVoice;
+      u.lang = jaVoice.lang || 'ja-JP';
+      u.rate = 0.85;
+      window.speechSynthesis.speak(u);
+      return true;
+    }
+  };
+
   KM.Music = {
     enabled: function () { return KM.Store.settings().music !== false; },
 

@@ -190,6 +190,19 @@
     ['いつつ','五つ','itsutsu','five things']
   ];
 
+  /* 数 — the digit you already read, against the kana you do not. */
+  const DIGITS = [
+    ['0','ぜろ','zero'],   ['1','いち','ichi'],  ['2','に','ni'],
+    ['3','さん','san'],    ['4','よん','yon'],   ['5','ご','go'],
+    ['6','ろく','roku'],   ['7','なな','nana'],  ['8','はち','hachi'],
+    ['9','きゅう','kyuu'], ['10','じゅう','juu'], ['11','じゅういち','juuichi'],
+    ['12','じゅうに','juuni'], ['15','じゅうご','juugo'], ['20','にじゅう','nijuu'],
+    ['24','にじゅうよん','nijuuyon'], ['30','さんじゅう','sanjuu'],
+    ['50','ごじゅう','gojuu'], ['99','きゅうじゅうきゅう','kyuujuukyuu'],
+    ['100','ひゃく','hyaku'], ['300','さんびゃく','sanbyaku'],
+    ['1000','せん','sen'], ['3000','さんぜん','sanzen'], ['10000','いちまん','ichiman']
+  ];
+
   function wordDeck(id, jp, en, note, rows) {
     return {
       id: id,
@@ -219,6 +232,17 @@
       'Big, small, new, old. Words ending in -i behave quite unlike words ending in -na.', ADJECTIVES),
     wordDeck('w-time', '時と色', 'Time and colour',
       'Today, tomorrow, red, white, and the four seasons that order the year.', TIME_COLOR),
+    {
+      id: 'w-digits',
+      jp: '数字',
+      en: 'Numbers from digits',
+      note: 'The digit is already familiar; the kana is not. Prices, platforms and floor numbers are written in Arabic numerals in Japan, so this is the pairing you actually need. Watch 300 and 3000 — the sound shifts to sanbyaku and sanzen.',
+      kind: 'word',
+      columns: 3,
+      items: DIGITS.map(function (r) {
+        return { id: 'w-digits:' + r[0], jp: r[1], kana: r[1], reading: r[2], en: r[0] };
+      })
+    },
     wordDeck('w-numbers', '数', 'Numbers',
       'One to ten thousand, plus the native counters hitotsu, futatsu, mittsu.', NUMBERS)
   ];

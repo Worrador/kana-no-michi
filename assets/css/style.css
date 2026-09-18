@@ -1167,3 +1167,16 @@ h1, h2, h3 { font-weight: 500; margin: 0; }
   letter-spacing: .04em;
   color: var(--sumi-soft);
 }
+
+/* what the placement ladder concluded */
+.verdict {
+  margin: 1.6rem 0 0;
+  padding: .9rem 1rem;
+  background: var(--paper-warm);
+  border-left: 3px solid var(--midori);
+  text-align: left;
+  font-size: .9rem;
+  line-height: 1.85;
+  color: var(--sumi-soft);
+}
+.verdict b { font-family: var(--font-jp); font-weight: 500; color: var(--sumi); letter-spacing: .1em; }

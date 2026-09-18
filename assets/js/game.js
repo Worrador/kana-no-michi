@@ -250,8 +250,102 @@
     [0.00, '末吉', 'Sue-kichi', 'Blessing yet to come']
   ];
 
+  /* 腕試し — a ladder. Four questions a rung, climbing while you keep passing, so a
+     beginner is done in eight questions and someone who knows the lot answers 32.
+     The point is not a score: it is to seed the scheduler so you are never taught
+     あ again if you already know it. */
+  const TIERS = [
+    { jp: 'ひらがな', en: 'Hiragana, the basic signs', decks: ['hira-gojuon'] },
+    { jp: '濁点と拗音', en: 'Hiragana marks and glides', decks: ['hira-dakuten', 'hira-yoon'] },
+    { jp: 'カタカナ', en: 'Katakana, the basic signs', decks: ['kata-gojuon'] },
+    { jp: 'カタカナの濁点と拗音', en: 'Katakana marks and glides', decks: ['kata-dakuten', 'kata-yoon'] },
+    { jp: '旅の漢字', en: 'Signs on the road', decks: ['s-way', 's-doors', 's-money', 's-warn'] },
+    { jp: '語彙', en: 'Everyday words',
+      decks: ['w-food', 'w-people', 'w-nature', 'w-daily', 'w-verbs', 'w-adjectives', 'w-time', 'w-numbers'] },
+    { jp: '漢字', en: 'Kanji', decks: ['k-numbers', 'k-nature', 'k-body', 'k-position', 'k-everyday'] },
+    { jp: '表現', en: 'Set phrases', decks: ['p-greetings', 'p-courtesy', 'p-household', 'p-travel'] }
+  ];
+
+  const PER_TIER = 4;
+  const PASS = 3;            /* three of four carries you up the ladder */
+
+  /* 級 and 段, the grades used for everything from judo to abacus. */
+  const GRADES = ['十級', '九級', '八級', '七級', '六級', '五級', '四級', '三級', '初段'];
+  const GRADE_EN = ['tenth kyuu', 'ninth kyuu', 'eighth kyuu', 'seventh kyuu', 'sixth kyuu',
+                    'fifth kyuu', 'fourth kyuu', 'third kyuu', 'first dan'];
+
+  function tierPool(index) {
+    let pool = [];
+    TIERS[index].decks.forEach(function (id) {
+      const d = KM.deckById[id];
+      if (d) pool = pool.concat(d.items);
+    });
+    return pool;
+  }
+
   KM.Game = {
     STATIONS: STATIONS,
+    TIERS: TIERS,
+    PER_TIER: PER_TIER,
+    GRADES: GRADES,
+
+    startPlacement: function () {
+      return {
+        mode: 'placement',
+        deckIds: [],
+        tier: 0,
+        tierCorrect: 0,
+        tierAsked: 0,
+        failStreak: 0,
+        cleared: [],           /* one entry per tier attempted: true if passed */
+        pool: tierPool(0),
+        typing: false, listening: false, building: false, blitz: false,
+        lastId: null,
+        total: Infinity,
+        asked: 0, correct: 0, score: 0, combo: 0, bestCombo: 0,
+        lives: Infinity,
+        missed: {}, seen: {},
+        stationErrors: 0, relit: false,
+        startedAt: Date.now(),
+        current: null, over: false, failed: false
+      };
+    },
+
+    /* What the ladder concluded, and where to start. */
+    placementResult: function (session) {
+      let passed = 0;
+      session.cleared.forEach(function (ok) { if (ok) passed++; });
+      /* Start at the lowest rung not cleared — which is not always the last one
+         attempted, since a rung can be failed and the one above it passed. */
+      let next = session.cleared.indexOf(false);
+      if (next === -1) next = Math.min(TIERS.length - 1, session.cleared.length);
+      return {
+        passed: passed,
+        attempted: session.cleared.length,
+        grade: GRADES[Math.min(GRADES.length - 1, passed)],
+        gradeEn: GRADE_EN[Math.min(GRADE_EN.length - 1, passed)],
+        complete: passed === TIERS.length,
+        next: TIERS[next],
+        nextDeck: TIERS[next].decks[0]
+      };
+    },
+
+    /* Seed the scheduler from what the ladder showed. Deliberately cautious: a rung
+       is four questions, not a survey of its hundred items, so a passed tier only
+       lifts its items to the first box. They still come round — just not as things
+       to be taught from scratch. */
+    applyPlacement: function (session) {
+      const srs = KM.Store.state().srs;
+      session.cleared.forEach(function (ok, i) {
+        if (!ok) return;
+        tierPool(i).forEach(function (it) {
+          const r = srs[it.id];
+          if (!r) srs[it.id] = { box: 1, due: Date.now() + 86400000, seen: 0, correct: 0, streak: 0 };
+          else if (r.box < 1) { r.box = 1; r.due = Date.now() + 86400000; }
+        });
+      });
+      KM.Store.save();
+    },
     STATION_LENGTH: STATION_LENGTH,
 
     /* 手習い — take the five signs you know least well, to be shown before they are asked.
@@ -387,6 +481,22 @@
       }
       KM.Store.markDay();
 
+      if (session.mode === 'placement') {
+        session.tierAsked++;
+        if (ok) session.tierCorrect++;
+        if (session.tierAsked >= PER_TIER) {
+          const cleared = session.tierCorrect >= PASS;
+          session.cleared.push(cleared);
+          session.failStreak = cleared ? 0 : session.failStreak + 1;
+          session.tierCorrect = 0;
+          session.tierAsked = 0;
+          session.tier++;
+          /* One bad rung can be luck; two in a row is where you actually stand. */
+          if (session.failStreak >= 2 || session.tier >= TIERS.length) session.over = true;
+          else session.pool = tierPool(session.tier);
+        }
+      }
+
       if (session.need) {
         const id = q.item.id;
         session.need[id] = ok
@@ -431,6 +541,10 @@
     },
 
     fortune: function (session) {
+      if (session.mode === 'placement') {
+        const r = KM.Game.placementResult(session);
+        return [r.grade, r.gradeEn, 'where the ladder placed you'];
+      }
       if (session.mode === 'lesson') return ['習得', 'Shuutoku', 'Learned by heart'];
       if (session.failed) return ['凶', 'Kyou', 'Turn back and walk it again'];
       const a = KM.Game.accuracy(session);

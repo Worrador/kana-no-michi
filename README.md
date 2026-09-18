@@ -22,6 +22,25 @@ At the end you are handed an **omikuji** — the paper fortune drawn at a shrine
 except this one is earned rather than drawn. 大吉 for a near-perfect walk, 凶 if
 the lanterns failed you.
 
+## 腕試し — the placement ladder
+
+Before anything else, if you already know some Japanese. Eight rungs — hiragana, its
+marks and glides, katakana, its marks and glides, signs, words, kanji, phrases — four
+questions each. Three of four carries you up. One bad rung is luck, so it takes **two
+consecutive failures** to stop you; a complete beginner is out in about eight questions,
+someone who knows the lot answers all thirty-two.
+
+You are graded in 級 and 段, the scale used for everything from judo to the abacus:
+十級 at the foot, 初段 at the top. But the grade is decoration. The point is that a
+cleared rung **seeds the scheduler** — its items are marked known, so 手習い stops
+offering them as new material and starts you at the first rung you did not clear.
+
+The seeding is deliberately cautious. Four questions is a sample of a rung, not a survey
+of its hundred items, so a cleared rung only lifts them to the first box: they still come
+round for review, they just are not taught from scratch. And the rung it starts you at is
+the lowest one you *failed*, not the last one you attempted — you can fail katakana and
+still pass the words above it, and the katakana is what you should go back to.
+
 ## Three ways to walk it
 
 It teaches before it tests. **手習い Learn** is the way in, and the other two are what

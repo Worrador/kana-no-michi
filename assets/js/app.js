@@ -9,7 +9,7 @@
    'filterNote','deckList','selectionNote','beginBtn','lanterns','score','combo','comboWrap','quitBtn',
    'road','stationName','burn','kakejiku','promptLabel','prompt','promptSub','stamp','answers',
    'typingForm','typingInput','feedback','stationKanji','stationRomaji','stationLine','stationGo',
-   'fortuneJp','fortuneRomaji','fortuneGloss','tally','missedWrap','missedList','againBtn',
+   'placementBtn','verdict','fortuneJp','fortuneRomaji','fortuneGloss','tally','missedWrap','missedList','againBtn',
    'teachCount','teachJp','teachReading','teachReadings','teachMeaning','teachHint','teachBack','teachNext',
    'teachRule','teachExample','studyRule',
    'studyTabs','studyNote','studyChart','totals','progressList','resetBtn'].forEach(function (id) {
@@ -214,6 +214,14 @@
     state.lastConfig = config;
     KM.Audio.wake();
 
+    if (config.mode === 'placement') {
+      state.session = KM.Game.startPlacement();
+      show('play');
+      renderHud();
+      nextQuestion();
+      return;
+    }
+
     if (config.mode === 'learn') {
       state.session = KM.Game.startLesson({
         deckIds: config.deckIds, size: 5,
@@ -309,6 +317,16 @@
       const within = (s.asked % KM.Game.STATION_LENGTH) + 1;
       el.stationName.textContent = station.jp + ' · ' + station.en + ' — ' +
         Math.min(within, KM.Game.STATION_LENGTH) + ' / ' + KM.Game.STATION_LENGTH;
+    } else if (s.mode === 'placement') {
+      let road = '';
+      KM.Game.TIERS.forEach(function (t, i) {
+        const done = s.cleared[i];
+        road += '<span class="step' + (done === true ? ' is-done' : i === s.tier ? ' is-now' : '') + '"></span>';
+      });
+      el.road.innerHTML = road;
+      const tier = KM.Game.TIERS[Math.min(KM.Game.TIERS.length - 1, s.tier)];
+      el.stationName.textContent = '腕試し · ' + tier.jp + ' — ' + tier.en +
+        ' (' + (s.tierAsked + 1) + ' / ' + KM.Game.PER_TIER + ')';
     } else if (s.mode === 'lesson') {
       const done = KM.Game.learnedCount(s);
       let road = '';
@@ -383,7 +401,8 @@
       }).join('');
     }
 
-    const limit = state.session.blitz ? (q.build ? 9000 : 5000)
+    const limit = state.session.mode === 'placement' ? 15000
+                : state.session.blitz ? (q.build ? 9000 : 5000)
                 : q.build ? 20000
                 : q.typed ? 13000
                 : q.listen ? 11000
@@ -563,7 +582,22 @@
       el.missedWrap.hidden = true;
     }
 
-    if (state.labelAgain) state.labelAgain(s.mode);
+    if (s.mode === 'placement') {
+      const r = KM.Game.placementResult(s);
+      KM.Game.applyPlacement(s);
+      state.placeDeck = r.nextDeck;
+      el.verdict.hidden = false;
+      el.verdict.innerHTML = r.complete
+        ? 'You cleared every rung. Nothing here is new to you — take 稽古 Practice, or 似た仮名 Lookalikes for the shapes that still catch people.'
+        : 'Cleared ' + r.passed + ' of ' + KM.Game.TIERS.length + ' rungs. Everything below is marked as known, ' +
+          'so it will come round for review rather than be taught again.<br>' +
+          '<b>Start here: ' + escapeHtml(r.next.jp) + '</b> — ' + escapeHtml(r.next.en) + '.';
+      el.againBtn.querySelector('.btn__jp').textContent = '手習い';
+      el.againBtn.querySelector('.btn__en').textContent = 'Learn from there';
+    } else {
+      el.verdict.hidden = true;
+      if (state.labelAgain) state.labelAgain(s.mode);
+    }
     if (s.failed) KM.Audio.wrong(); else KM.Audio.fanfare();
     state.session = null;
     show('result');
@@ -818,7 +852,20 @@
       });
     });
 
+    el.placementBtn.addEventListener('click', function () {
+      leaveRun();
+      KM.Audio.wake();
+      KM.Audio.page();
+      begin({ mode: 'placement', deckIds: [] });
+    });
+
     el.againBtn.addEventListener('click', function () {
+      /* After a placement the useful next step is a lesson where it left you. */
+      if (state.lastConfig && state.lastConfig.mode === 'placement' && state.placeDeck) {
+        state.mode = 'learn';
+        state.selected = [state.placeDeck];
+        return begin({ mode: 'learn', deckIds: [state.placeDeck] });
+      }
       if (state.lastConfig) begin(state.lastConfig); else show('paths');
     });
 

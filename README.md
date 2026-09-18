@@ -27,7 +27,7 @@ the lanterns failed you.
 | | |
 |---|---|
 | **旅 Journey** | Five stations, thirty questions, four lanterns, a score and a fortune at the end. |
-| **稽古 Practice** | No lanterns, no ending. The scheduler picks whatever you are weakest at and keeps handing it to you. Leave when you like. |
+| **稽古 Practice** | No lanterns and no finish line. The scheduler picks whatever you are weakest at and keeps handing it to you. It ends only when you press **やめる Quit** — and you still get your tally and a fortune. |
 
 And **巻物 Scrolls**, which is not a game at all: every chart laid out flat, with a
 small green bar under each entry showing how well it has settled in.
@@ -80,11 +80,28 @@ Everything on screen is generated — there is not one image file in this reposi
 - Cherry petals drift down the background on a canvas, and stop entirely if you have
   asked your system for reduced motion.
 - **灯** in the corner turns the paper to night: lantern light on sumi black.
+- The paper ground is fixed to the viewport, so a long page scrolls over it rather than
+  dragging it along and tiling it.
 
-Sound is synthesised at runtime with the Web Audio API — no files. Right answers
-strike **拍子木**, the wooden clappers that open a kabuki scene, over a koto string
-plucked up the **hirajōshi** scale as your combo climbs. Reaching a station rings a
-**鈴** standing bell.
+## Sound
+
+All of it is synthesised at runtime with the Web Audio API. There are no audio files
+either.
+
+Right answers strike **拍子木**, the wooden clappers that open a kabuki scene, over a
+koto string plucked up the **hirajōshi** scale as your combo climbs. Reaching a
+station rings a **鈴** standing bell.
+
+Behind that sits a **background piece that composes itself as it plays** — a slow koto
+ambience on the same hirajōshi tuning, sparse and deliberately unresolved. The melody
+is a weighted random walk that prefers small steps and leaves gaps; a low string sounds
+every eighth beat, a drone breathes underneath, and the whole thing runs through a
+generated reverb impulse so it has a room around it. It never loops, because there is
+no loop — it is written one beat ahead of itself, forever.
+
+Two independent toggles sit in the top corner: **音** effects and **楽** music. Both are
+remembered. The music waits for your first click, as browsers require, fades in rather
+than starting abruptly, and hushes itself when you switch tabs.
 
 ## Playing
 
@@ -100,6 +117,10 @@ npx serve .
 
 **Keys.** `1`–`4` choose an answer, `Enter` walks on from a station, `Esc` leaves
 the road.
+
+**A first run.** Take 旅に出る, tick only **ひらがな 五十音**, and leave 書く unticked —
+recognising a sign is much easier than producing it from nothing, and there is no point
+being timed on both at once.
 
 ## Layout
 

@@ -3,7 +3,7 @@
   const KM = window.KM;
   const $ = function (id) { return document.getElementById(id); };
   const el = {};
-  ['screens','petals','brandHome','toggleSound','toggleTheme','titleStreak','pathsSubtitle','pathsNote',
+  ['screens','petals','brandHome','toggleSound','toggleMusic','toggleTheme','titleStreak','pathsSubtitle','pathsNote',
    'optTyping','deckList','selectionNote','beginBtn','lanterns','score','combo','comboWrap','quitBtn',
    'road','stationName','burn','kakejiku','promptLabel','prompt','promptSub','stamp','answers',
    'typingForm','typingInput','feedback','stationKanji','stationRomaji','stationLine','stationGo',
@@ -74,7 +74,7 @@
     el.pathsSubtitle.textContent = state.mode === 'journey' ? 'Choose your road' : 'Choose what to practise';
     el.pathsNote.textContent = state.mode === 'journey'
       ? 'Five post stations, six questions each, three lanterns. A wrong answer snuffs one out.'
-      : 'No timer pressure beyond the incense, no lanterns, no end. Leave whenever you like.';
+      : 'No lanterns and no finish line — it hands you whatever you are weakest at, for as long as you like. Press やめる Quit to stop, and you still get your tally and a fortune.';
     el.optTyping.checked = !!KM.Store.settings().typing;
 
     let html = '';
@@ -143,7 +143,8 @@
         Math.min(within, KM.Game.STATION_LENGTH) + ' / ' + KM.Game.STATION_LENGTH;
     } else {
       el.road.innerHTML = '';
-      el.stationName.textContent = '稽古 · practice — ' + s.asked + ' answered';
+      el.stationName.textContent = '稽古 · practice — ' + s.asked +
+        ' answered · やめる when you have had enough';
     }
   }
 
@@ -169,11 +170,12 @@
     el.promptSub.textContent = (q.dir === 'jp2en' && q.item.kana && q.item.kana !== q.item.jp)
       ? q.item.kana : '';
 
+    el.typingInput.value = '';
+    el.typingInput.disabled = false;
+
     if (q.typed) {
       el.answers.innerHTML = '';
       el.typingForm.hidden = false;
-      el.typingInput.value = '';
-      el.typingInput.disabled = false;
       el.typingInput.focus();
     } else {
       el.typingForm.hidden = true;
@@ -463,6 +465,10 @@
     document.documentElement.dataset.theme = s.theme;
     el.toggleTheme.textContent = s.theme === 'night' ? '月' : '灯';
     el.toggleTheme.title = s.theme === 'night' ? 'Night — tap for day' : 'Day — tap for night';
+    const musicOn = s.music !== false;
+    el.toggleMusic.textContent = musicOn ? '楽' : '黙';
+    el.toggleMusic.setAttribute('aria-pressed', musicOn);
+    el.toggleMusic.title = musicOn ? 'Music on — tap for silence' : 'Music off';
     el.toggleSound.textContent = s.sound === false ? '静' : '音';
     el.toggleSound.setAttribute('aria-pressed', s.sound !== false);
     el.toggleSound.title = s.sound === false ? 'Sound off' : 'Sound on';
@@ -518,6 +524,13 @@
       KM.Audio.page();
     });
 
+    el.toggleMusic.addEventListener('click', function () {
+      const wasOn = KM.Store.settings().music !== false;
+      KM.Store.setSetting('music', !wasOn);
+      applyTheme();
+      if (wasOn) KM.Music.stop(); else KM.Music.start();
+    });
+
     el.optTyping.addEventListener('change', function () {
       KM.Store.setSetting('typing', el.optTyping.checked);
     });
@@ -545,7 +558,7 @@
 
     el.typingForm.addEventListener('submit', function (e) {
       e.preventDefault();
-      if (state.locked) return;
+      if (state.locked || !state.q || !state.q.typed) return;
       const v = el.typingInput.value.trim();
       if (v) submit(v);
     });
@@ -575,9 +588,23 @@
       }
     });
 
+    /* Nothing may sound before the first gesture, so the music waits for one. */
+    function firstGesture() {
+      state.gestured = true;
+      KM.Audio.wake();
+      if (KM.Store.settings().music !== false) KM.Music.start();
+      document.removeEventListener('pointerdown', firstGesture);
+      document.removeEventListener('keydown', firstGesture);
+    }
+    document.addEventListener('pointerdown', firstGesture);
+    document.addEventListener('keydown', firstGesture);
+
     window.addEventListener('resize', function () { petalsCtl.resize(); });
 
     document.addEventListener('visibilitychange', function () {
+      if (document.hidden) KM.Music.stop(true);
+      else if (state.gestured && KM.Store.settings().music !== false) KM.Music.start();
+
       if (document.hidden && state.screen === 'play' && state.session && !state.locked) {
         /* pause honestly: stop the burn where it stands */
         stopTimer();

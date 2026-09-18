@@ -7,7 +7,7 @@
     version: 1,
     srs: {},
     stats: { answers: 0, correct: 0, journeys: 0, longestCombo: 0, best: {}, days: {} },
-    settings: { theme: 'day', sound: true, typing: false }
+    settings: { theme: 'day', sound: true, music: true, typing: false }
   };
 
   function clone(o) { return JSON.parse(JSON.stringify(o)); }

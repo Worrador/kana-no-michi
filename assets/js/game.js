@@ -8,7 +8,7 @@
   KM.deckOfItem = {};
 
   KM.initData = function () {
-    KM.decks = [].concat(KM.DATA.kana, KM.DATA.kanji, KM.DATA.vocab, KM.DATA.phrases);
+    KM.decks = [].concat(KM.DATA.kana, KM.DATA.kanji, KM.DATA.signs, KM.DATA.vocab, KM.DATA.phrases);
     KM.decks.forEach(function (d) {
       KM.deckById[d.id] = d;
       d.items.forEach(function (it) {
@@ -63,6 +63,8 @@
     if (deck.kind === 'kanji') return r < 0.38 ? 'jp2en' : r < 0.62 ? 'en2jp'
                                     : r < 0.88 ? 'jp2read' : 'read2jp';
     if (deck.kind === 'word')  return r < 0.44 ? 'jp2en' : r < 0.78 ? 'en2jp' : 'jp2read';
+    /* Signs are recognised, not read aloud — meaning only, both ways. */
+    if (deck.kind === 'sign')  return r < 0.6 ? 'jp2en' : 'en2jp';
     return r < 0.55 ? 'jp2en' : 'en2jp';
   }
 
@@ -77,13 +79,15 @@
 
   const LABELS = {
     jp2read: { kana: 'How is this kana read?', kanji: 'How is this kanji read?',
-               word: 'Read this aloud', phrase: 'Read this aloud' },
+               sign: 'How is this sign read?', word: 'Read this aloud', phrase: 'Read this aloud' },
     read2jp: { kana: 'Which kana is this?', kanji: 'Which kanji is read this way?',
-               word: 'Which word is this?', phrase: 'Which phrase is this?' },
+               sign: 'Which sign is this?', word: 'Which word is this?', phrase: 'Which phrase is this?' },
     jp2en:   { kana: 'What does this mean?', kanji: 'What does this kanji mean?',
-               word: 'What does this word mean?', phrase: 'What does this phrase mean?' },
+               sign: 'What does this sign mean?', word: 'What does this word mean?',
+               phrase: 'What does this phrase mean?' },
     en2jp:   { kana: 'Which kana?', kanji: 'Which kanji means this?',
-               word: 'Which word says this?', phrase: 'Which phrase says this?' }
+               sign: 'Which sign says this?', word: 'Which word says this?',
+               phrase: 'Which phrase says this?' }
   };
 
   function buildQuestion(session) {
@@ -106,7 +110,9 @@
       label: LABELS[dir][deck.kind],
       prompt: faceFor(item, deck, dir, 'q'),
       answer: answer,
-      big: dir === 'read2jp' || dir === 'en2jp' ? false : (deck.kind === 'kana' || deck.kind === 'kanji'),
+      big: dir === 'read2jp' || dir === 'en2jp' ? false
+             : (deck.kind === 'kana' || deck.kind === 'kanji' ||
+                (deck.kind === 'sign' && item.jp.length === 1)),
       sub: '',
       choices: []
     };

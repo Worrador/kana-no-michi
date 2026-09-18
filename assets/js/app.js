@@ -83,6 +83,7 @@
     return [
       { jp: '仮名', en: 'Kana', decks: KM.DATA.kana },
       { jp: '漢字', en: 'Kanji', decks: KM.DATA.kanji },
+      { jp: '旅の漢字', en: 'Signs on the road', decks: KM.DATA.signs },
       { jp: '語彙', en: 'Words', decks: KM.DATA.vocab },
       { jp: '表現', en: 'Phrases', decks: KM.DATA.phrases }
     ];
@@ -449,7 +450,7 @@
     el.studyNote.textContent = deck.note;
     el.studyRule.hidden = deck.kind !== 'kanji';
     if (!el.studyRule.hidden && !el.studyRule.innerHTML) el.studyRule.innerHTML = YOMI_RULE;
-    const wide = deck.kind === 'phrase';
+    const wide = deck.kind === 'phrase' || deck.kind === 'sign';
     el.studyChart.className = 'chart chart--' + (wide ? 2 : deck.columns);
     el.studyChart.innerHTML = deck.items.map(function (it) {
       const r = KM.SRS.peek(it.id);
@@ -598,6 +599,8 @@
       if (go) {
         const mode = go.getAttribute('data-mode');
         if (mode) state.mode = mode;
+        /* Arriving at the road list is a fresh choice; do not inherit the last one. */
+        if (go.getAttribute('data-go') === 'paths') state.selected = [];
         leaveRun();
         KM.Audio.wake();
         KM.Audio.page();

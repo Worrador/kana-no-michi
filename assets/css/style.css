@@ -26,7 +26,7 @@
 
   /* Japanese: a mincho (serif) face, best available. BIZ UDPMincho and Yu Mincho ship
      with Windows, Hiragino with macOS, Noto elsewhere. MS Mincho is the last resort. */
-  --font-jp: "BIZ UDPMincho", "Yu Mincho", YuMincho, "YuMincho",
+  --font-jp: "Noto Serif JP Subset", "BIZ UDPMincho", "Yu Mincho", YuMincho, "YuMincho",
              "Hiragino Mincho ProN", "Hiragino Mincho Pro",
              "Noto Serif JP", "Noto Serif CJK JP", "Source Han Serif JP",
              "MS PMincho", "MS Mincho", serif;

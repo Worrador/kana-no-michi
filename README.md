@@ -38,7 +38,7 @@ small green bar under each entry showing how well it has settled in.
 
 ## What it teaches
 
-**481 items** across 23 roads.
+**518 items** across 27 roads.
 
 - **仮名 Kana (208)** — hiragana and katakana, each in three roads: the 46 basic
   signs, the 25 voiced forms (`か → が`), and the 33 glides (`き + ゃ → きゃ`).
@@ -67,6 +67,11 @@ small green bar under each entry showing how well it has settled in.
 - **語彙 Words (162)** — food, people and family, nature, everyday things, verbs,
   adjectives, time and colour, numbers. Roughly JLPT N5 in scope, with kanji shown
   where a beginner would really meet it.
+- **旅の漢字 Signs (37)** — the characters you meet rather than study: 出口 入口
+  非常口, 男 女, 北口, 押 引, 大人 子供, 無料 有料, 禁煙 危険, 準備中. Asked by meaning
+  only, in both directions, and never for a reading — you do not need to know that 出口
+  reads *deguchi* in order to walk through it. Each carries a note on where you actually
+  meet it.
 - **表現 Phrases (40)** — greetings, courtesy, the fixed exchanges of home and
   workplace, and what to say on the road. Each one carries a note about *when* it
   is actually said, which is usually the harder half.
@@ -155,10 +160,12 @@ only then set out on 旅 — the road is a test, and it expects you to bring som
 
 ```
 index.html              every screen, as plain sections
+assets/css/fonts.css    Noto Serif JP, subset and inlined as a data URI
 assets/css/style.css    the whole look; patterns and textures are inline SVG
 assets/js/
   data/kana.js          hiragana and katakana, with shape mnemonics
   data/kanji.js         71 kanji with both reading families and their origins
+  data/signs.js         37 signs for travelling, recognised by meaning alone
   data/vocab.js         eight themed word lists
   data/phrases.js       set phrases, each with a note on when to say it
   storage.js            one localStorage key, versioned
@@ -170,6 +177,23 @@ assets/js/
 
 Scripts are plain classic scripts sharing a `KM` namespace rather than ES modules,
 specifically so that `file://` works without a server.
+
+### Typography
+
+Three faces, deliberately. Japanese is set in **Noto Serif JP**, subset to the ~590
+characters the game actually renders and inlined into `assets/css/fonts.css` as a data
+URI — about 150 KB. It is inlined rather than linked because Chrome treats every
+`file://` document as an opaque origin and refuses to load a linked font from one, so a
+linked `woff2` would silently fall back for anyone who just double-clicks `index.html`.
+Latin prose uses an old-style serif from the system, and **romaji has its own monospace
+stack** (Fira Code first, where installed), used only where romaji appears as a reading —
+the typing field, reading lines, compound glosses — so transliteration reads as a gloss
+set apart from the text, and `shougakkou` is unambiguous.
+
+Run `python tools/build-font.py` after adding new Japanese text, to re-subset and
+re-inline. The source font is downloaded on demand and is not committed; only the
+subset ships. Noto Serif JP is under the SIL Open Font License 1.1 — see
+`assets/fonts/OFL.txt`.
 
 ### Adding material
 

@@ -6,7 +6,9 @@
   const KM = (window.KM = window.KM || {});
   KM.DATA = KM.DATA || {};
 
-  /* Each row is a set of signs that look alike. Order does not matter. */
+  /* Every member is a kana. Kanji decoys were removed after ロ was offered against 口
+     and 囗 — shapes that differ only in proportion, which is a property of the font
+     rather than of the writing system. */
   const SETS = [
     [['あ','a'],['お','o'],['む','mu']],
     [['い','i'],['り','ri'],['こ','ko']],
@@ -22,24 +24,22 @@
     [['シ','shi'],['ツ','tsu'],['ソ','so'],['ン','n']],
     [['ノ','no'],['メ','me'],['ヌ','nu'],['ス','su']],
     [['ウ','u'],['ワ','wa'],['フ','fu'],['ク','ku']],
-    [['コ','ko'],['ユ','yu'],['エ','e'],['ヨ','yo']],
+    [['コ','ko'],['ユ','yu'],['エ','e'],['ヨ','yo'],['ロ','ro']],
     [['ケ','ke'],['タ','ta'],['ナ','na'],['チ','chi']],
     [['ル','ru'],['レ','re'],['ノ','no']],
     [['マ','ma'],['ム','mu'],['ア','a']],
     [['テ','te'],['チ','chi'],['ラ','ra']],
-    [['ホ','ho'],['オ','o'],['木','ki — the kanji for tree']],
+    [['ホ','ho'],['オ','o'],['ネ','ne']],
     [['ミ','mi'],['シ','shi'],['ニ','ni']],
-    [['ロ','ro'],['口','kuchi — the kanji for mouth'],['囗','not a kana at all']],
-    [['カ','ka'],['力','chikara — the kanji for power']],
     [['リ','ri'],['ソ','so'],['ノ','no']],
     [['セ','se'],['サ','sa'],['ヤ','ya']],
-    [['モ','mo'],['ヲ','wo'],['毛','ke — the kanji for hair']]
+    [['モ','mo'],['ヲ','wo'],['ラ','ra']],
+    [['カ','ka'],['ケ','ke'],['ク','ku']]
   ];
 
   /* The notes worth having in front of you while drilling these. */
   const NOTES = {
     'シ': 'Two dots at the LEFT, sweep up from below.',
-    'ツ': 'Two dots at the TOP, sweep down from above.',
     'ソ': 'One dot at the TOP, stroke down. Compare ン.',
     'ン': 'One dot at the LEFT, sweep up. Compare ソ.',
     'ぬ': 'Ends in a loop. め does not.',
@@ -53,7 +53,11 @@
     'ほ': 'は with an extra horizontal bar.',
     'さ': 'Opens to the left. ち opens to the right.',
     'ち': 'さ mirrored.',
-    'ロ': 'A kana. 口 mouth and 囗 enclosure are kanji, and squarer.'
+    'ロ': 'A closed box. コ is the same shape with the bottom left open.',
+    'コ': 'Open at the bottom. ロ is closed all the way round.',
+    'ホ': 'A vertical with a crossbar and two separate dots. オ has no dots.',
+    'オ': 'ホ without the two dots.',
+    'ツ': 'Two dots at the TOP, sweep down from above.'
   };
 
   /* A sign can sit in several sets — り is confused with い and with リ — so the

@@ -38,9 +38,9 @@ small green bar under each entry showing how well it has settled in.
 
 ## What it teaches
 
-**614 items** across 29 roads.
+**615 items** across 29 roads.
 
-- **似た仮名 Lookalikes (72)** — the pairs that actually get confused, drilled only
+- **似た仮名 Lookalikes (73)** — the pairs that actually get confused, drilled only
   against each other. A normal question draws its wrong answers from the whole deck,
   which is easy: め is obvious beside か. It is not obvious beside ぬ. Here every wrong
   answer is a sign you could genuinely mistake this one for — ぬ/め, シ/ツ/ソ/ン,

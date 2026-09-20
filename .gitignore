@@ -6,3 +6,4 @@ Thumbs.db
 .idea/
 assets/fonts/NotoSerifJP-Regular.otf
 .charset.txt
+dist/

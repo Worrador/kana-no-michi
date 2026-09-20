@@ -659,9 +659,15 @@
     el.progressList.innerHTML = KM.decks.map(function (d) {
       const m = KM.SRS.mastery(d.items);
       const r = KM.SRS.rank(m);
+      const met = KM.SRS.learned(d.items);
       return '<div class="prow">' +
-        '<span class="prow__name">' + d.jp + '<small>' + d.en + '</small></span>' +
-        '<span class="prow__rank">' + r[0] + ' · ' + Math.round(m * 100) + '%</span>' +
+        '<span class="prow__name">' + d.jp + '<small>' + d.en +
+          ' · ' + met + ' of ' + d.items.length + ' met</small></span>' +
+        '<span class="prow__right">' +
+          '<span class="prow__rank">' + r[0] + ' · ' + Math.round(m * 100) + '%</span>' +
+          '<button class="prow__forget" type="button" data-forget="' + d.id + '"' +
+            (met ? '' : ' disabled') + ' title="Forget this road and walk it again">忘れる</button>' +
+        '</span>' +
         '<span class="prow__bar"><i style="width:' + (m * 100).toFixed(1) + '%"></i></span>' +
         '</div>';
     }).join('');
@@ -784,6 +790,20 @@
         deck.setAttribute('aria-pressed', i === -1);
         KM.Audio.page();
         return updateSelection();
+      }
+
+      /* One road at a time, rather than only the whole record. */
+      const forget = e.target.closest('[data-forget]');
+      if (forget && !forget.disabled) {
+        const deck = KM.deckById[forget.getAttribute('data-forget')];
+        if (!deck) return;
+        const warn = 'Forget ' + deck.jp + '?' + String.fromCharCode(10, 10) +
+          'Everything recorded for its ' + deck.items.length +
+          ' items goes, and 手習い will teach them from scratch again. Every other road is untouched.';
+        if (!window.confirm(warn)) return;
+        KM.SRS.forget(deck.items);
+        KM.Audio.page();
+        return renderRecords();
       }
 
       const tab = e.target.closest('[data-tab]');

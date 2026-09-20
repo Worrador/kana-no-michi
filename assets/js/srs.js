@@ -16,6 +16,14 @@
     record: rec,
     peek: function (id) { return KM.Store.state().srs[id] || null; },
 
+    /* Drop every record for these items, so the road counts as unwalked again. */
+    forget: function (items) {
+      const srs = KM.Store.state().srs;
+      items.forEach(function (it) { delete srs[it.id]; });
+      KM.Store.save();
+      return items.length;
+    },
+
     isDue: function (id) {
       const r = KM.Store.state().srs[id];
       return !r || r.due <= Date.now();

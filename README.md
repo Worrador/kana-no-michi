@@ -139,6 +139,13 @@ it* and *hear it and type it* for free. One table in `game.js` declares what app
 where, and both the engine and the road list read it, so the list can never offer a
 road where a ticked switch would quietly do nothing.
 
+## Forgetting one road
+
+**記録 Records** lists every road with how much of it you have met, and each carries its
+own 忘れる. It clears that road's scheduler records and nothing else — 手習い will teach
+those signs from scratch again, and the other twenty-eight are untouched. The full
+白紙に戻す is still there for starting over completely.
+
 ## How it decides what to ask
 
 A five-box Leitner scheduler, one box per item, with intervals of 0, 1, 3, 7 and 21

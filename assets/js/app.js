@@ -124,6 +124,7 @@
       { jp: '漢字', en: 'Kanji', decks: KM.DATA.kanji },
       { jp: '旅の漢字', en: 'Signs on the road', decks: KM.DATA.signs },
       { jp: '語彙', en: 'Words', decks: KM.DATA.vocab },
+      { jp: '動画の単語', en: 'Course words, in order', decks: KM.DATA.video },
       { jp: '表現', en: 'Phrases', decks: KM.DATA.phrases }
     ];
   }

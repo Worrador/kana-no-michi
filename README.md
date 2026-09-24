@@ -103,9 +103,10 @@ small green bar under each entry showing how well it has settled in.
   only, in both directions, and never for a reading — you do not need to know that 出口
   reads *deguchi* in order to walk through it. Each carries a note on where you actually
   meet it.
-- **動画の単語 Course words (240)** — vocabulary followed along with a video course,
-  kept in **the order the course teaches it**, twelve blocks of twenty, so a block
-  matches what you have just watched rather than being scattered by theme. Romaji is
+- **動画の単語 Course words (520)** — vocabulary followed along with two video courses,
+  kept in **the order each course teaches it**, in blocks of twenty, so a block matches
+  what you have just watched rather than being scattered by theme. The two are separate
+  roads on the list (一 and 二) because their numbering restarts. Romaji is
   derived from the kana by `tools/kana-to-romaji.py` rather than typed by hand; where a
   word also appears in the themed decks the two agree on every one of the 64 overlaps,
   which is how the converter was checked. Three readings in the source were wrong and

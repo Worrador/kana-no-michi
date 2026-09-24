@@ -31,7 +31,7 @@
   }
 
   KM.DATA.video = [
-    videoDeck("v-580", "単語 561–580", "Course words 561–580",
+    videoDeck("v-580", "一 · 単語 561–580", "Course words 561–580",
       "Words 561 to 580 of the course, in the order it teaches them. The block closes at 4:48:39.", [
         ["しろい", "白い", "shiroi", "white"],
         ["あかい", "赤い", "akai", "red"],
@@ -54,7 +54,7 @@
         ["としょかん", "図書館", "toshokan", "library"],
         ["スーパー", "", "suupaa", "supermarket"]
       ]),
-    videoDeck("v-600", "単語 581–600", "Course words 581–600",
+    videoDeck("v-600", "一 · 単語 581–600", "Course words 581–600",
       "Words 581 to 600 of the course, in the order it teaches them. The block closes at 4:58:57.", [
         ["ヘリコプター", "", "herikoputaa", "helicopter"],
         ["くろい", "黒い", "kuroi", "black"],
@@ -77,7 +77,7 @@
         ["えんぴつ", "鉛筆", "enpitsu", "pencil"],
         ["けしゴム", "消しゴム", "keshigomu", "eraser"]
       ]),
-    videoDeck("v-620", "単語 601–620", "Course words 601–620",
+    videoDeck("v-620", "一 · 単語 601–620", "Course words 601–620",
       "Words 601 to 620 of the course, in the order it teaches them. The block closes at 5:09:20.", [
         ["いぬ", "犬", "inu", "dog"],
         ["ねこ", "猫", "neko", "cat"],
@@ -100,7 +100,7 @@
         ["かに", "", "kani", "crab"],
         ["かめ", "亀", "kame", "turtle"]
       ]),
-    videoDeck("v-640", "単語 621–640", "Course words 621–640",
+    videoDeck("v-640", "一 · 単語 621–640", "Course words 621–640",
       "Words 621 to 640 of the course, in the order it teaches them. The block closes at 5:16:59.", [
         ["バナナ", "", "banana", "banana"],
         ["りんご", "", "ringo", "apple"],
@@ -123,7 +123,7 @@
         ["いるか", "", "iruka", "dolphin"],
         ["いか", "", "ika", "squid"]
       ]),
-    videoDeck("v-660", "単語 641–660", "Course words 641–660",
+    videoDeck("v-660", "一 · 単語 641–660", "Course words 641–660",
       "Words 641 to 660 of the course, in the order it teaches them. The block closes at 5:25:43.", [
         ["うれしい", "嬉しい", "ureshii", "happy"],
         ["かなしい", "悲しい", "kanashii", "sad"],
@@ -146,7 +146,7 @@
         ["ピーマン", "", "piiman", "bell pepper"],
         ["ブロッコリー", "", "burokkorii", "broccoli"]
       ]),
-    videoDeck("v-680", "単語 661–680", "Course words 661–680",
+    videoDeck("v-680", "一 · 単語 661–680", "Course words 661–680",
       "Words 661 to 680 of the course, in the order it teaches them. The block closes at 5:33:54.", [
         ["シャツ", "", "shatsu", "shirt"],
         ["パンツ", "", "pantsu", "trousers"],
@@ -169,7 +169,7 @@
         ["おんなのこ", "女の子", "onnanoko", "girl"],
         ["おとこのこ", "男の子", "otokonoko", "boy"]
       ]),
-    videoDeck("v-700", "単語 681–700", "Course words 681–700",
+    videoDeck("v-700", "一 · 単語 681–700", "Course words 681–700",
       "Words 681 to 700 of the course, in the order it teaches them. The block closes at 5:42:43.", [
         ["とけい", "時計", "tokei", "watch"],
         ["めがね", "眼鏡", "megane", "glasses"],
@@ -192,7 +192,7 @@
         ["うま", "馬", "uma", "horse"],
         ["ゆき", "雪", "yuki", "snow"]
       ]),
-    videoDeck("v-720", "単語 701–720", "Course words 701–720",
+    videoDeck("v-720", "一 · 単語 701–720", "Course words 701–720",
       "Words 701 to 720 of the course, in the order it teaches them. The block closes at 5:51:04.", [
         ["て", "手", "te", "hand"],
         ["うで", "腕", "ude", "arm"],
@@ -215,7 +215,7 @@
         ["じゅういちがつ", "十一月", "juuichigatsu", "November"],
         ["じゅうにがつ", "十二月", "juunigatsu", "December"]
       ]),
-    videoDeck("v-740", "単語 721–740", "Course words 721–740",
+    videoDeck("v-740", "一 · 単語 721–740", "Course words 721–740",
       "Words 721 to 740 of the course, in the order it teaches them. The block closes at 6:00:23.", [
         ["できる", "", "dekiru", "can, to be able to"],
         ["れい", "零", "rei", "zero"],
@@ -238,7 +238,7 @@
         ["からだ", "体", "karada", "body"],
         ["あたま", "頭", "atama", "head"]
       ]),
-    videoDeck("v-760", "単語 741–760", "Course words 741–760",
+    videoDeck("v-760", "一 · 単語 741–760", "Course words 741–760",
       "Words 741 to 760 of the course, in the order it teaches them. The block closes at 6:10:34.", [
         ["わらう", "笑う", "warau", "to laugh"],
         ["おいしい", "美味しい", "oishii", "delicious"],
@@ -261,7 +261,7 @@
         ["つくる", "作る", "tsukuru", "to make"],
         ["つかう", "使う", "tsukau", "to use"]
       ]),
-    videoDeck("v-780", "単語 761–780", "Course words 761–780",
+    videoDeck("v-780", "一 · 単語 761–780", "Course words 761–780",
       "Words 761 to 780 of the course, in the order it teaches them. The block closes at 6:21:23.", [
         ["きょう", "今日", "kyou", "today"],
         ["きのう", "昨日", "kinou", "yesterday"],
@@ -284,7 +284,7 @@
         ["する", "", "suru", "to do"],
         ["いく", "行く", "iku", "to go"]
       ]),
-    videoDeck("v-800", "単語 781–800", "Course words 781–800",
+    videoDeck("v-800", "一 · 単語 781–800", "Course words 781–800",
       "Words 781 to 800 of the course, in the order it teaches them. The block closes at 6:32:17.", [
         ["こんにちは", "", "konnichiwa", "hello"],
         ["すみません", "", "sumimasen", "excuse me"],

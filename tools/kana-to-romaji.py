@@ -96,5 +96,9 @@ def romaji(kana):
             out.append(SINGLES[ch]); i += 1; continue
         if ch in '〜～':
             out.append('~'); i += 1; continue
+        # Latin letters and digits appear inside some loanwords (DVDプレーヤー) and
+        # simply carry through.
+        if ch.isascii() and (ch.isalnum() or ch in ' -'):
+            out.append(ch); i += 1; continue
         raise ValueError('no mapping for %r in %r' % (ch, kana))
     return ''.join(out)

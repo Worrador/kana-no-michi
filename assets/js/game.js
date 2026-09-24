@@ -8,7 +8,7 @@
   KM.deckOfItem = {};
 
   KM.initData = function () {
-    KM.decks = [].concat(KM.DATA.kana, KM.DATA.lookalikes, KM.DATA.kanji, KM.DATA.signs, KM.DATA.vocab, KM.DATA.video, KM.DATA.phrases);
+    KM.decks = [].concat(KM.DATA.kana, KM.DATA.lookalikes, KM.DATA.kanji, KM.DATA.signs, KM.DATA.vocab, KM.DATA.video, KM.DATA.video2, KM.DATA.phrases);
     KM.decks.forEach(function (d) {
       KM.deckById[d.id] = d;
       d.items.forEach(function (it) {
